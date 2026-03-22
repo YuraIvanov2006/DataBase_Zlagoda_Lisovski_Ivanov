@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.lisovskyi_ivanov.backend.entity.Employee;
 import org.lisovskyi_ivanov.backend.enums.Role;
 import org.lisovskyi_ivanov.backend.mapping.mapper.EmployeeRowMapper;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -19,12 +23,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     private static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
 
     private final JdbcTemplate jdbc;
+    private final NamedParameterJdbcTemplate namedJdbc;
     private final EmployeeRowMapper employeeRowMapper;
 
     @Override
     public List<Employee> findAll() {
-        String sql = "SELECT * FROM employees";
-        return jdbc.query(sql, employeeRowMapper);
+        return jdbc.query(SELECT_ALL, employeeRowMapper);
     }
 
     @Override
@@ -35,14 +39,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public List<Employee> findAllCashiers() {
-        String sql = SELECT_ALL + " WHERE empl_role = 'cashier'";
-        return jdbc.query(sql, employeeRowMapper);
+        return findAllByRole(Role.CASHIER);
     }
 
     @Override
     public List<Employee> findAllManagers() {
-        String sql = SELECT_ALL + " WHERE empl_role = 'manager'";
-        return jdbc.query(sql, employeeRowMapper);
+        return findAllByRole(Role.MANAGER);
     }
 
     @Override
@@ -66,45 +68,33 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Optional<Employee> findById(Long id) {
         String sql = SELECT_ALL + " WHERE id_employee = ?";
-        try {
-            var employee = jdbc.queryForObject(sql, employeeRowMapper, id);
-            return Optional.of(employee);
-        } catch (EmptyResultDataAccessException _) {
-            return Optional.empty();
-        }
+        return jdbc.query(sql, employeeRowMapper, id)
+                .stream()
+                .findFirst();
     }
 
     @Override
     public Optional<Employee> findBySurname(String surname) {
         String sql = SELECT_ALL + " WHERE empl_surname = ?";
-        try {
-            var employee = jdbc.queryForObject(sql, employeeRowMapper, surname);
-            return Optional.of(employee);
-        } catch (EmptyResultDataAccessException _) {
-            return Optional.empty();
-        }
+        return jdbc.query(sql, employeeRowMapper, surname)
+                .stream()
+                .findFirst();
     }
 
     @Override
     public Optional<Employee> findBySurnameAndName(String surname, String name) {
         String sql = SELECT_ALL + " WHERE empl_surname = ? AND empl_name = ?";
-        try {
-            var employee = jdbc.queryForObject(sql, employeeRowMapper, surname, name);
-            return Optional.of(employee);
-        } catch (EmptyResultDataAccessException _) {
-            return Optional.empty();
-        }
+        return jdbc.query(sql, employeeRowMapper, surname, name)
+                .stream()
+                .findFirst();
     }
 
     @Override
     public Optional<Employee> findBySurnameAndNameAndPatronymic(String surname, String name, String patronymic) {
         String sql = SELECT_ALL + " WHERE empl_surname = ? AND empl_name = ? AND empl_patronymic = ?";
-        try {
-            var employee = jdbc.queryForObject(sql, employeeRowMapper, surname, name, patronymic);
-            return Optional.of(employee);
-        } catch (EmptyResultDataAccessException _) {
-            return Optional.empty();
-        }
+        return jdbc.query(sql, employeeRowMapper, surname, name, patronymic)
+                .stream()
+                .findFirst();
     }
 
     @Override
@@ -112,17 +102,21 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
         String sql =
         """
         INSERT INTO employees (
-            id_employee, empl_surname, empl_name, empl_patronymic,\s
-            empl_role, salary, date_of_birth, date_of_start,\s
+            empl_surname, empl_name, empl_patronymic,
+            empl_role, salary, date_of_birth, date_of_start,
             empl_phone_number, empl_city, empl_street, empl_zip_code
         ) VALUES (
-            :idEmployee, :emplSurname, :emplName, :emplPatronymic,\s
-            :emplRole, :salary, :dateOfBirth, :dateOfStart,\s
-            :phoneNumber, :city, :street, :zipCode
-        ) RETURNING *;
+            :emplSurname, :emplName, :emplPatronymic,
+            :emplRole, :salary, :dateOfBirth, :dateOfStart,
+            :emplPhoneNumber, :emplCity, :emplStreet, :emplZipCode
+        );
         """;
 
-        return jdbc.queryForObject(sql, employeeRowMapper, employee);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedJdbc.update(sql, employeeParameters(employee), keyHolder, new String[] {"id_employee"});
+
+        Long generatedId = keyHolder.getKeyAs(Long.class);
+        return findById(generatedId).orElseThrow();
     }
 
     @Override
@@ -137,14 +131,14 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
             salary = :salary,
             date_of_birth = :dateOfBirth,
             date_of_start = :dateOfStart,
-            empl_phone_number = :phoneNumber,
-            empl_city = :city,
-            empl_street = :street,
-            empl_zip_code = :zipCode
+            empl_phone_number = :emplPhoneNumber,
+            empl_city = :emplCity,
+            empl_street = :emplStreet,
+            empl_zip_code = :emplZipCode
         WHERE id_employee = :idEmployee;
         """;
 
-        jdbc.update(sql, employee);
+        namedJdbc.update(sql, employeeParameters(employee));
     }
 
     @Override
@@ -163,5 +157,22 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public void delete(Employee employee) {
         deleteById(employee.getIdEmployee());
+    }
+
+
+    private SqlParameterSource employeeParameters(Employee employee) {
+        return new MapSqlParameterSource()
+                .addValue("idEmployee", employee.getIdEmployee())
+                .addValue("emplSurname", employee.getEmplSurname())
+                .addValue("emplName", employee.getEmplName())
+                .addValue("emplPatronymic", employee.getEmplPatronymic())
+                .addValue("emplRole", employee.getEmplRole().getRoleName())
+                .addValue("salary", employee.getSalary())
+                .addValue("dateOfBirth", employee.getDateOfBirth())
+                .addValue("dateOfStart", employee.getDateOfStart())
+                .addValue("emplPhoneNumber", employee.getEmplPhoneNumber())
+                .addValue("emplCity", employee.getEmplCity())
+                .addValue("emplStreet", employee.getEmplStreet())
+                .addValue("emplZipCode", employee.getEmplZipCode());
     }
 }

@@ -20,7 +20,7 @@ public final class EmployeeObject {
                 .emplSurname(rs.getString("empl_surname"))
                 .emplName(rs.getString("empl_name"))
                 .emplPatronymic(rs.getString("empl_patronymic"))
-                .emplRole(Role.getRoleFromString(rs.getString("role")).orElse(null))
+                .emplRole(Role.getRoleFromString(rs.getString("empl_role")).orElse(null))
                 .salary(rs.getBigDecimal("salary"))
                 .dateOfBirth(dateOfBirth != null ? dateOfBirth.toLocalDate() : null)
                 .dateOfStart(dateOfStart != null ? dateOfStart.toLocalDate() : null)

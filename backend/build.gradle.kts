@@ -26,6 +26,9 @@ repositories {
 
 val dotenvVersion = "4.0.0"
 
+extra["h2.version"] = "2.2.224"
+
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-h2console")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
