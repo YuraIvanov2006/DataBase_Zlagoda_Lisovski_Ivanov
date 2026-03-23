@@ -18,7 +18,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CategoryRepositoryImpl implements CategoryRepository {
     private static final String TABLE_NAME = "categories";
-    private static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
+    private static final String SELECT_ALL =
+            "SELECT category_number, category_name FROM " + TABLE_NAME;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
@@ -31,9 +32,15 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
-    public Optional<Category> findById(Long id) {
+    public List<Category> findAllByCategoryName(String categoryName) {
+        String sql = SELECT_ALL + " WHERE category_name = ?";
+        return jdbc.query(sql, categoryRowMapper, categoryName);
+    }
+
+    @Override
+    public Optional<Category> findByCategoryNumber(Long categoryNumber) {
         String sql = SELECT_ALL + " WHERE category_number = ?";
-        return jdbc.query(sql, categoryRowMapper, id)
+        return jdbc.query(sql, categoryRowMapper, categoryNumber)
                 .stream()
                 .findFirst();
     }
@@ -53,11 +60,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         namedJdbc.update(sql, categoryParameters(category), keyHolder, new String[] {"category_number"});
 
         Long generatedId = keyHolder.getKeyAs(Long.class);
-        return findById(generatedId).orElseThrow();
+        return findByCategoryNumber(generatedId).orElseThrow();
     }
 
     @Override
-    public void update(Category category) {
+    public int update(Category category) {
         String sql =
         """
         UPDATE categories SET
@@ -65,18 +72,18 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         WHERE category_number = :categoryNumber;
         """;
 
-        namedJdbc.update(sql, categoryParameters(category));
+        return namedJdbc.update(sql, categoryParameters(category));
     }
 
     @Override
-    public void delete(Category category) {
-        deleteById(category.getCategoryNumber());
+    public int delete(Category category) {
+        return deleteById(category.getCategoryNumber());
     }
 
     @Override
-    public void deleteById(Long id) {
+    public int deleteById(Long id) {
         String sql = "DELETE FROM categories WHERE category_number = ?";
-        jdbc.update(sql, id);
+        return jdbc.update(sql, id);
     }
 
     @Override

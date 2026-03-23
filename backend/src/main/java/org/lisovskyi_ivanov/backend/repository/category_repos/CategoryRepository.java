@@ -7,10 +7,11 @@ import java.util.Optional;
 
 public interface CategoryRepository {
     List<Category> findAll();
-    Optional<Category> findById(Long id);
+    List<Category> findAllByCategoryName(String categoryName);
+    Optional<Category> findByCategoryNumber(Long categoryNumber);
     Category save(Category category);
-    void update(Category category);
-    void delete(Category category);
-    void deleteById(Long id);
+    int update(Category category);
+    int delete(Category category);
+    int deleteById(Long id);
     boolean existsById(Long id);
 }

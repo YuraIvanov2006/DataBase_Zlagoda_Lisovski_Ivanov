@@ -20,8 +20,8 @@ public interface EmployeeRepository {
     Optional<Employee> findBySurnameAndName(String surname, String name);
     Optional<Employee> findBySurnameAndNameAndPatronymic(String surname, String name, String patronymic);
     Employee save(Employee employee);
-    void update(Employee employee);
+    int update(Employee employee);
     boolean existsById(Long id);
-    void deleteById(Long id);
-    void delete(Employee employee);
+    int deleteById(Long id);
+    int delete(Employee employee);
 }

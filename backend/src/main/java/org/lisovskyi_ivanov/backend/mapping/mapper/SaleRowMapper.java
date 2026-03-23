@@ -1,7 +1,6 @@
 package org.lisovskyi_ivanov.backend.mapping.mapper;
 
-import org.lisovskyi_ivanov.backend.entity.*;
-import org.lisovskyi_ivanov.backend.enums.Role;
+import org.lisovskyi_ivanov.backend.entity.Sale;
 import org.lisovskyi_ivanov.backend.mapping.object.SaleObject;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;

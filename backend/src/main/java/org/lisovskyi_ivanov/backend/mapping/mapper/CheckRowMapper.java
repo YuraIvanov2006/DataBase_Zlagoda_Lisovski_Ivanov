@@ -1,9 +1,6 @@
 package org.lisovskyi_ivanov.backend.mapping.mapper;
 
 import org.lisovskyi_ivanov.backend.entity.Check;
-import org.lisovskyi_ivanov.backend.entity.CustomerCard;
-import org.lisovskyi_ivanov.backend.entity.Employee;
-import org.lisovskyi_ivanov.backend.enums.Role;
 import org.lisovskyi_ivanov.backend.mapping.object.CheckObject;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;

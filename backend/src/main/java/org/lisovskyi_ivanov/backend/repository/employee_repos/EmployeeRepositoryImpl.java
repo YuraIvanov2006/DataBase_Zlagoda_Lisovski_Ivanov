@@ -120,7 +120,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     }
 
     @Override
-    public void update(Employee employee) {
+    public int update(Employee employee) {
         String sql =
         """
         UPDATE employees SET
@@ -138,7 +138,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
         WHERE id_employee = :idEmployee;
         """;
 
-        namedJdbc.update(sql, employeeParameters(employee));
+        return namedJdbc.update(sql, employeeParameters(employee));
     }
 
     @Override
@@ -149,14 +149,14 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public int deleteById(Long id) {
         String sql = "DELETE FROM employees WHERE id_employee = ?";
-        jdbc.update(sql, id);
+        return jdbc.update(sql, id);
     }
 
     @Override
-    public void delete(Employee employee) {
-        deleteById(employee.getIdEmployee());
+    public int delete(Employee employee) {
+        return deleteById(employee.getIdEmployee());
     }
 
 

@@ -1,7 +1,5 @@
 package org.lisovskyi_ivanov.backend.mapping.mapper;
 
-import org.lisovskyi_ivanov.backend.entity.Category;
-import org.lisovskyi_ivanov.backend.entity.Product;
 import org.lisovskyi_ivanov.backend.entity.StoreProduct;
 import org.lisovskyi_ivanov.backend.mapping.object.StoreProductObject;
 import org.springframework.jdbc.core.RowMapper;
