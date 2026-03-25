@@ -11,8 +11,15 @@ public final class CheckObject {
     }
 
     public static Check getCheck(ResultSet rs, int rowNum) throws SQLException {
-        var employee = EmployeeObject.getEmployee(rs, rowNum);
-        var customerCard = CustomerCardObject.getCustomerCard(rs, rowNum);
+        long employeeId = rs.getLong("id_employee");
+        var employee = (employeeId != 0)
+                ? EmployeeObject.getEmployee(rs, rowNum)
+                : null;
+
+        String cardNumber = rs.getString("card_number");
+        var customerCard = cardNumber != null
+                ? CustomerCardObject.getCustomerCard(rs, rowNum)
+                : null;
         var printDate = rs.getTimestamp("print_date");
 
         return Check.builder()

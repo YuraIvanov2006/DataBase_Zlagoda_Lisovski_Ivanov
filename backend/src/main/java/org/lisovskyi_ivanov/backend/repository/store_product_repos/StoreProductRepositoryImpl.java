@@ -18,9 +18,12 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
     private static final String SELECT_ALL =
         """
         SELECT sp.*,
-               base_upc AS base_product_upc
+           p.product_name, p.manufacturer, p.characteristics, p.category_number,
+           c.category_name,
+           sp.upc_prom AS base_product_upc
         FROM store_products sp
-        LEFT JOIN store_products base ON sp.id_base_product = base.upc
+        INNER JOIN products p ON sp.id_product = p.id_product
+        INNER JOIN categories c ON p.category_number = c.category_number
         """;
 
     private final JdbcTemplate jdbc;
@@ -61,9 +64,9 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
         String sql =
         """
         INSERT INTO store_products (
-            upc, id_product, id_base_product, selling_price, products_number, promotional_product
+            upc, id_product, upc_prom, selling_price, products_number, promotional_product
         ) VALUES (
-            :upc, :id_product, :id_base_product, :selling_price, :products_number, :promotional_product
+            :upc, :id_product, :upc_prom, :selling_price, :products_number, :promotional_product
         )
         """;
 
@@ -77,7 +80,7 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
         """
         UPDATE store_products SET
             id_product = :id_product,
-            id_base_product = :id_base_product,
+            upc_prom = :upc_prom,
             selling_price = :selling_price,
             products_number = :products_number,
             promotional_product = :promotional_product
@@ -108,7 +111,7 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
         return new MapSqlParameterSource()
                 .addValue("upc", storeProduct.getUpc())
                 .addValue("id_product", storeProduct.getProduct().getIdProduct())
-                .addValue("id_base_product", storeProduct.getBaseProduct() != null ? storeProduct.getBaseProduct().getUpc() : null)
+                .addValue("upc_prom", storeProduct.getBaseProduct() != null ? storeProduct.getBaseProduct().getUpc() : null)
                 .addValue("selling_price", storeProduct.getSellingPrice())
                 .addValue("products_number", storeProduct.getProductsNumber())
                 .addValue("promotional_product", storeProduct.isPromotionalProduct());

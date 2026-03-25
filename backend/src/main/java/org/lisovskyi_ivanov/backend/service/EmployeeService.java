@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.lisovskyi_ivanov.backend.entity.Employee;
 import org.lisovskyi_ivanov.backend.enums.Role;
 import org.lisovskyi_ivanov.backend.repository.employee_repos.EmployeeRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,3 +152,4 @@ public class EmployeeService {
         }
     }
 }
+

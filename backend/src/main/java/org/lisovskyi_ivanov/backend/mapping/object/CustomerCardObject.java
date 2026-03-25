@@ -17,7 +17,7 @@ public final class CustomerCardObject {
                 .custSurname(rs.getString("cust_surname"))
                 .custName(rs.getString("cust_name"))
                 .custPatronymic(rs.getString("cust_patronymic"))
-                .custPhoneNumber(rs.getString("phone_number"))
+                .custPhoneNumber(rs.getString("cust_phone_number"))
                 .custCity(rs.getString("cust_city"))
                 .custStreet(rs.getString("cust_street"))
                 .custZipCode(rs.getString("cust_zip_code"))

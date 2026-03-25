@@ -47,9 +47,11 @@ public class CustomerCardRepositoryImpl implements CustomerCardRepository {
         String sql =
                 """
                 INSERT INTO customer_cards (
-                    card_number, cust_surname, cust_name, phone_number, percent
+                    card_number, cust_surname, cust_name, cust_patronymic, 
+                    cust_phone_number, cust_city, cust_street, cust_zip_code, percent
                 ) VALUES (
-                    :cardNumber, :custSurname, :custName, :phoneNumber, :percent
+                    :card_number, :cust_surname, :cust_name, :cust_patronymic, 
+                    :cust_phone_number, :cust_city, :cust_street, :cust_zip_code, :percent
                 );
                 """;
 
@@ -62,11 +64,15 @@ public class CustomerCardRepositoryImpl implements CustomerCardRepository {
         String sql =
                 """
                 UPDATE customer_cards SET
-                    cust_surname = :custSurname,
-                    cust_name = :custName,
-                    phone_number = :phoneNumber,
+                    cust_surname = :cust_surname,
+                    cust_name = :cust_name,
+                    cust_patronymic = :cust_patronymic,
+                    cust_phone_number = :cust_phone_number,
+                    cust_city = :cust_city,
+                    cust_street = :cust_street,
+                    cust_zip_code = :cust_zip_code,
                     percent = :percent
-                WHERE card_number = :cardNumber;
+                WHERE card_number = :card_number;
                 """;
 
         return namedJdbc.update(sql, customerCardParameters(customerCard));
@@ -92,14 +98,14 @@ public class CustomerCardRepositoryImpl implements CustomerCardRepository {
 
     private SqlParameterSource customerCardParameters(CustomerCard customerCard) {
         return new MapSqlParameterSource()
-                .addValue("cardNumber", customerCard.getCardNumber())
-                .addValue("custSurname", customerCard.getCustSurname())
-                .addValue("custName", customerCard.getCustName())
-                .addValue("custPhoneNumber", customerCard.getCustPhoneNumber())
-                .addValue("custCity", customerCard.getCustCity())
-                .addValue("custStreet", customerCard.getCustStreet())
-                .addValue("custZipCode", customerCard.getCustZipCode())
-                .addValue("custPatronymic", customerCard.getCustPatronymic())
+                .addValue("card_number", customerCard.getCardNumber())
+                .addValue("cust_surname", customerCard.getCustSurname())
+                .addValue("cust_name", customerCard.getCustName())
+                .addValue("cust_patronymic", customerCard.getCustPatronymic())
+                .addValue("cust_phone_number", customerCard.getCustPhoneNumber())
+                .addValue("cust_city", customerCard.getCustCity())
+                .addValue("cust_street", customerCard.getCustStreet())
+                .addValue("cust_zip_code", customerCard.getCustZipCode())
                 .addValue("percent", customerCard.getPercent());
     }
 }

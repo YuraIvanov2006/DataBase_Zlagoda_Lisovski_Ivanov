@@ -24,4 +24,5 @@ public interface EmployeeRepository {
     boolean existsById(Long id);
     int deleteById(Long id);
     int delete(Employee employee);
+
 }

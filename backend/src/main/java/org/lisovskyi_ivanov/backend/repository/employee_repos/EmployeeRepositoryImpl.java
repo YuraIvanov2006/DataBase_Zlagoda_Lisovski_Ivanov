@@ -28,12 +28,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public List<Employee> findAll() {
-        return jdbc.query(SELECT_ALL, employeeRowMapper);
+        return jdbc.query(SELECT_ALL + " ORDER BY id_employee", employeeRowMapper);
     }
 
     @Override
     public List<Employee> findAllByRole(Role role) {
-        String sql = SELECT_ALL + " WHERE empl_role = ?";
+        String sql = SELECT_ALL + " WHERE empl_role = ? ORDER BY empl_surname";
         return jdbc.query(sql, employeeRowMapper, role.getRoleName());
     }
 
@@ -49,7 +49,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public List<Employee> findAllByCity(String city) {
-        String sql = SELECT_ALL + " WHERE empl_city = ?";
+        String sql = SELECT_ALL + " WHERE empl_city = ? ORDER BY empl_surname";
         return jdbc.query(sql, employeeRowMapper, city);
     }
 
@@ -61,7 +61,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public List<Employee> findAllBySalaryGreaterThan(BigDecimal salary) {
-        String sql = SELECT_ALL + " WHERE salary > ?";
+        String sql = SELECT_ALL + " WHERE salary > ? ORDER BY salary DESC";
         return jdbc.query(sql, employeeRowMapper, salary);
     }
 
@@ -100,17 +100,17 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Employee save(Employee employee) {
         String sql =
-        """
-        INSERT INTO employees (
-            empl_surname, empl_name, empl_patronymic,
-            empl_role, salary, date_of_birth, date_of_start,
-            empl_phone_number, empl_city, empl_street, empl_zip_code
-        ) VALUES (
-            :emplSurname, :emplName, :emplPatronymic,
-            :emplRole, :salary, :dateOfBirth, :dateOfStart,
-            :emplPhoneNumber, :emplCity, :emplStreet, :emplZipCode
-        );
-        """;
+            """
+            INSERT INTO employees (
+                empl_surname, empl_name, empl_patronymic,
+                empl_role, salary, date_of_birth, date_of_start,
+                empl_phone_number, empl_city, empl_street, empl_zip_code
+            ) VALUES (
+                :empl_surname, :empl_name, :empl_patronymic,
+                :empl_role, :salary, :date_of_birth, :date_of_start,
+                :empl_phone_number, :empl_city, :empl_street, :empl_zip_code
+            );
+            """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedJdbc.update(sql, employeeParameters(employee), keyHolder, new String[] {"id_employee"});
@@ -122,21 +122,21 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public int update(Employee employee) {
         String sql =
-        """
-        UPDATE employees SET
-            empl_surname = :emplSurname,
-            empl_name = :emplName,
-            empl_patronymic = :emplPatronymic,
-            empl_role = :emplRole,
-            salary = :salary,
-            date_of_birth = :dateOfBirth,
-            date_of_start = :dateOfStart,
-            empl_phone_number = :emplPhoneNumber,
-            empl_city = :emplCity,
-            empl_street = :emplStreet,
-            empl_zip_code = :emplZipCode
-        WHERE id_employee = :idEmployee;
-        """;
+            """
+            UPDATE employees SET
+                empl_surname = :empl_surname,
+                empl_name = :empl_name,
+                empl_patronymic = :empl_patronymic,
+                empl_role = :empl_role,
+                salary = :salary,
+                date_of_birth = :date_of_birth,
+                date_of_start = :date_of_start,
+                empl_phone_number = :empl_phone_number,
+                empl_city = :empl_city,
+                empl_street = :empl_street,
+                empl_zip_code = :empl_zip_code
+            WHERE id_employee = :id_employee;
+            """;
 
         return namedJdbc.update(sql, employeeParameters(employee));
     }
@@ -162,17 +162,17 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     private SqlParameterSource employeeParameters(Employee employee) {
         return new MapSqlParameterSource()
-                .addValue("idEmployee", employee.getIdEmployee())
-                .addValue("emplSurname", employee.getEmplSurname())
-                .addValue("emplName", employee.getEmplName())
-                .addValue("emplPatronymic", employee.getEmplPatronymic())
-                .addValue("emplRole", employee.getEmplRole().getRoleName())
+                .addValue("id_employee", employee.getIdEmployee())
+                .addValue("empl_surname", employee.getEmplSurname())
+                .addValue("empl_name", employee.getEmplName())
+                .addValue("empl_patronymic", employee.getEmplPatronymic())
+                .addValue("empl_role", employee.getEmplRole().getRoleName())
                 .addValue("salary", employee.getSalary())
-                .addValue("dateOfBirth", employee.getDateOfBirth())
-                .addValue("dateOfStart", employee.getDateOfStart())
-                .addValue("emplPhoneNumber", employee.getEmplPhoneNumber())
-                .addValue("emplCity", employee.getEmplCity())
-                .addValue("emplStreet", employee.getEmplStreet())
-                .addValue("emplZipCode", employee.getEmplZipCode());
+                .addValue("date_of_birth", employee.getDateOfBirth())
+                .addValue("date_of_start", employee.getDateOfStart())
+                .addValue("empl_phone_number", employee.getEmplPhoneNumber())
+                .addValue("empl_city", employee.getEmplCity())
+                .addValue("empl_street", employee.getEmplStreet())
+                .addValue("empl_zip_code", employee.getEmplZipCode());
     }
 }

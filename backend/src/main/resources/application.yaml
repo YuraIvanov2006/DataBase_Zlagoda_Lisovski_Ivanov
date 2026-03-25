@@ -4,12 +4,24 @@ spring:
     name: backend
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-
+#  datasource:
+#    url: postgresql://postgres:${SUPABASE_PASSWORD}@db.alijbefjtfmnxirvpquc.supabase.co:5432/postgres
+#    username: postgres
+#    password: ${SUPABASE_PASSWORD}
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
+
+  docker:
+    compose:
+      enabled: false
+
+  config:
+    import: optional:file:.env[.properties]
+
+
 
 server:
   servlet:

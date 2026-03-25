@@ -28,12 +28,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public List<Category> findAll() {
-        return jdbc.query(SELECT_ALL, categoryRowMapper);
+        return jdbc.query(SELECT_ALL + " ORDER BY category_name", categoryRowMapper);
     }
 
     @Override
     public List<Category> findAllByCategoryName(String categoryName) {
-        String sql = SELECT_ALL + " WHERE category_name = ?";
+        String sql = SELECT_ALL + " WHERE category_name = ? ORDER BY category_name";
         return jdbc.query(sql, categoryRowMapper, categoryName);
     }
 
@@ -48,13 +48,10 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     @Override
     public Category save(Category category) {
         String sql =
-        """
-        INSERT INTO categories (
-            category_name
-        ) VALUES (
-            :categoryName
-        );
-        """;
+            """
+            INSERT INTO categories (category_name)
+            VALUES (:category_name);
+            """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedJdbc.update(sql, categoryParameters(category), keyHolder, new String[] {"category_number"});
@@ -68,8 +65,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         String sql =
         """
         UPDATE categories SET
-            category_name = :categoryName
-        WHERE category_number = :categoryNumber;
+            category_name = :category_name
+        WHERE category_number = :category_number;
         """;
 
         return namedJdbc.update(sql, categoryParameters(category));
@@ -96,7 +93,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     private SqlParameterSource categoryParameters(Category category) {
         return new MapSqlParameterSource()
-                .addValue("categoryNumber", category.getCategoryNumber())
-                .addValue("categoryName", category.getCategoryName());
+                .addValue("category_number", category.getCategoryNumber())
+                .addValue("category_name", category.getCategoryName());
     }
 }
