@@ -11,7 +11,6 @@ public interface CategoryRepository {
     Optional<Category> findByCategoryNumber(Long categoryNumber);
     Category save(Category category);
     int update(Category category);
-    int delete(Category category);
-    int deleteById(Long id);
-    boolean existsById(Long id);
+    int deleteByCategoryNumber(Long categoryNumber);
+    boolean existsById(Long categoryNumber);
 }

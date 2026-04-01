@@ -2,6 +2,7 @@ package org.lisovskyi_ivanov.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lisovskyi_ivanov.backend.entity.Check;
+import org.lisovskyi_ivanov.backend.exception.NotFoundException;
 import org.lisovskyi_ivanov.backend.repository.check_repos.CheckRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.lisovskyi_ivanov.backend.utility.StringGenerator.generateUniqueString;
 
@@ -18,18 +18,18 @@ import static org.lisovskyi_ivanov.backend.utility.StringGenerator.generateUniqu
 public class CheckService {
     private final CheckRepository repository;
 
-
     @Transactional(readOnly = true)
     public List<Check> findAll() {
         return repository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Optional<Check> findByCheckNumber(String checkNumber) {
+    public Check findByCheckNumber(String checkNumber) {
         if (checkNumber == null || checkNumber.isBlank()) {
             throw new IllegalArgumentException("Check number must not be null or blank");
         }
-        return repository.findByCheckNumber(checkNumber);
+        return repository.findByCheckNumber(checkNumber)
+                .orElseThrow(() -> new NotFoundException(Check.class, "checkNumber", checkNumber));
     }
 
     @Transactional(readOnly = true)
@@ -50,16 +50,25 @@ public class CheckService {
 
     @Transactional(readOnly = true)
     public List<Check> findByPrintDate(LocalDateTime date) {
+        if (date == null) {
+            throw new IllegalArgumentException("Print date must not be null");
+        }
         return repository.findByPrintDate(date);
     }
 
     @Transactional(readOnly = true)
     public List<Check> findBySumTotalGreaterThan(BigDecimal sumTotal) {
+        if (sumTotal == null || sumTotal.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Sum total must not be null or negative");
+        }
         return repository.findBySumTotalGreaterThan(sumTotal);
     }
 
     @Transactional(readOnly = true)
     public List<Check> findByVatGreaterThan(BigDecimal vat) {
+        if (vat == null || vat.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("VAT must not be null or negative");
+        }
         return repository.findByVatGreaterThan(vat);
     }
 
@@ -94,21 +103,39 @@ public class CheckService {
     }
 
     @Transactional
-    public int update(Check check) {
+    public Check update(Check check) {
         if (check == null) {
             throw new IllegalArgumentException("Check must not be null");
         }
-        return repository.update(check);
+        int rows = repository.update(check);
+        if (rows == 0) {
+            throw new NotFoundException(Check.class, "checkNumber", check.getCheckNumber());
+        }
+        return check;
     }
 
     @Transactional
-    public int delete(Check check) {
-        return repository.delete(check);
+    public void delete(Check check) {
+        if (check == null) {
+            throw new IllegalArgumentException("Check must not be null");
+        }
+        if (check.getCheckNumber() == null || check.getCheckNumber().isBlank()) {
+            throw new IllegalArgumentException("Check number must not be null or blank");
+        }
+        int rows = repository.delete(check);
+        if (rows == 0) {
+            throw new NotFoundException(Check.class, "checkNumber", check.getCheckNumber());
+        }
     }
 
     @Transactional
-    public int deleteByCheckNumber(String checkNumber) {
-        return repository.deleteByCheckNumber(checkNumber);
+    public void deleteByCheckNumber(String checkNumber) {
+        if (checkNumber == null || checkNumber.isBlank()) {
+            throw new IllegalArgumentException("Check number must not be null or blank");
+        }
+        int rows = repository.deleteByCheckNumber(checkNumber);
+        if (rows == 0) {
+            throw new NotFoundException(Check.class, "checkNumber", checkNumber);
+        }
     }
-
 }

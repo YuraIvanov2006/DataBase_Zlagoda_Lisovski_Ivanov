@@ -20,7 +20,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EmployeeRepositoryImpl implements EmployeeRepository {
     private static final String TABLE_NAME = "employees";
-    private static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
+    private static final String SELECT_ALL =
+            "SELECT id_employee, empl_surname, empl_name, empl_patronymic, " +
+                    "empl_role, salary, date_of_birth, date_of_start, " +
+                    "empl_phone_number, empl_city, empl_street, empl_zip_code " +
+                    "FROM " + TABLE_NAME;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
@@ -100,50 +104,51 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Employee save(Employee employee) {
         String sql =
-            """
-            INSERT INTO employees (
-                empl_surname, empl_name, empl_patronymic,
-                empl_role, salary, date_of_birth, date_of_start,
-                empl_phone_number, empl_city, empl_street, empl_zip_code
-            ) VALUES (
-                :empl_surname, :empl_name, :empl_patronymic,
-                :empl_role, :salary, :date_of_birth, :date_of_start,
-                :empl_phone_number, :empl_city, :empl_street, :empl_zip_code
-            );
-            """;
+                """
+                INSERT INTO employees (
+                    empl_surname, empl_name, empl_patronymic,
+                    empl_role, salary, date_of_birth, date_of_start,
+                    empl_phone_number, empl_city, empl_street, empl_zip_code
+                ) VALUES (
+                    :empl_surname, :empl_name, :empl_patronymic,
+                    :empl_role, :salary, :date_of_birth, :date_of_start,
+                    :empl_phone_number, :empl_city, :empl_street, :empl_zip_code
+                );
+                """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedJdbc.update(sql, employeeParameters(employee), keyHolder, new String[] {"id_employee"});
 
         Long generatedId = keyHolder.getKeyAs(Long.class);
-        return findById(generatedId).orElseThrow();
+        return findById(generatedId)
+                .orElseThrow(() -> new IllegalStateException("Failed to save employee with ID: " + generatedId));
     }
 
     @Override
     public int update(Employee employee) {
         String sql =
-            """
-            UPDATE employees SET
-                empl_surname = :empl_surname,
-                empl_name = :empl_name,
-                empl_patronymic = :empl_patronymic,
-                empl_role = :empl_role,
-                salary = :salary,
-                date_of_birth = :date_of_birth,
-                date_of_start = :date_of_start,
-                empl_phone_number = :empl_phone_number,
-                empl_city = :empl_city,
-                empl_street = :empl_street,
-                empl_zip_code = :empl_zip_code
-            WHERE id_employee = :id_employee;
-            """;
+                """
+                UPDATE employees SET
+                    empl_surname = :empl_surname,
+                    empl_name = :empl_name,
+                    empl_patronymic = :empl_patronymic,
+                    empl_role = :empl_role,
+                    salary = :salary,
+                    date_of_birth = :date_of_birth,
+                    date_of_start = :date_of_start,
+                    empl_phone_number = :empl_phone_number,
+                    empl_city = :empl_city,
+                    empl_street = :empl_street,
+                    empl_zip_code = :empl_zip_code
+                WHERE id_employee = :id_employee;
+                """;
 
         return namedJdbc.update(sql, employeeParameters(employee));
     }
 
     @Override
     public boolean existsById(Long id) {
-        String sql = "SELECT COUNT(*) FROM employees WHERE id_employee = ?";
+        String sql = "SELECT COUNT(id_employee) FROM employees WHERE id_employee = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }
@@ -158,7 +163,6 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     public int delete(Employee employee) {
         return deleteById(employee.getIdEmployee());
     }
-
 
     private SqlParameterSource employeeParameters(Employee employee) {
         return new MapSqlParameterSource()

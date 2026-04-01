@@ -20,7 +20,10 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     private static final String SELECT_ALL =
             """
-            SELECT a.*, e.*
+            SELECT a.id_account, a.id_employee, a.login, a.password, a.authority,
+                   e.empl_surname, e.empl_name, e.empl_patronymic, e.empl_role, 
+                   e.salary, e.date_of_birth, e.date_of_start, e.empl_phone_number, 
+                   e.empl_city, e.empl_street, e.empl_zip_code
             FROM accounts a
             JOIN employees e ON a.id_employee = e.id_employee
             """;

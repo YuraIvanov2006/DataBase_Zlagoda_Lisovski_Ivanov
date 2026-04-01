@@ -15,5 +15,4 @@ public interface ProductRepository {
     int update(Product product);
     boolean existsById(Long id);
     int deleteById(Long id);
-    int delete(Product product);
 }

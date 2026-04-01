@@ -168,7 +168,7 @@ class ProductRepositoryTest {
     void delete_shouldRemoveProduct_whenExists() {
         var savedProduct = productRepository.save(buildTestProduct("To Delete"));
 
-        productRepository.delete(savedProduct);
+//        productRepository.delete(savedProduct);
 
         var deletedProduct = productRepository.findById(savedProduct.getIdProduct());
         assertTrue(deletedProduct.isEmpty());

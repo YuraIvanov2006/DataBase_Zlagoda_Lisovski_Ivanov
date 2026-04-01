@@ -16,15 +16,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StoreProductRepositoryImpl implements StoreProductRepository {
     private static final String SELECT_ALL =
-        """
-        SELECT sp.*,
-           p.product_name, p.manufacturer, p.characteristics, p.category_number,
-           c.category_name,
-           sp.upc_prom AS base_product_upc
-        FROM store_products sp
-        INNER JOIN products p ON sp.id_product = p.id_product
-        INNER JOIN categories c ON p.category_number = c.category_number
-        """;
+            """
+            SELECT sp.upc, sp.id_product, sp.upc_prom, sp.selling_price, 
+                   sp.products_number, sp.promotional_product,
+                   p.product_name, p.manufacturer, p.characteristics, p.category_number,
+                   c.category_name,
+                   sp.upc_prom AS base_product_upc
+            FROM store_products sp
+            INNER JOIN products p ON sp.id_product = p.id_product
+            INNER JOIN categories c ON p.category_number = c.category_number
+            """;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
@@ -62,13 +63,13 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
     @Override
     public StoreProduct save(StoreProduct storeProduct) {
         String sql =
-        """
-        INSERT INTO store_products (
-            upc, id_product, upc_prom, selling_price, products_number, promotional_product
-        ) VALUES (
-            :upc, :id_product, :upc_prom, :selling_price, :products_number, :promotional_product
-        )
-        """;
+                """
+                INSERT INTO store_products (
+                    upc, id_product, upc_prom, selling_price, products_number, promotional_product
+                ) VALUES (
+                    :upc, :id_product, :upc_prom, :selling_price, :products_number, :promotional_product
+                )
+                """;
 
         namedJdbc.update(sql, storeProductParameters(storeProduct));
         return findByUPC(storeProduct.getUpc()).orElseThrow();
@@ -77,15 +78,15 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
     @Override
     public int update(StoreProduct storeProduct) {
         String sql =
-        """
-        UPDATE store_products SET
-            id_product = :id_product,
-            upc_prom = :upc_prom,
-            selling_price = :selling_price,
-            products_number = :products_number,
-            promotional_product = :promotional_product
-        WHERE upc = :upc;
-        """;
+                """
+                UPDATE store_products SET
+                    id_product = :id_product,
+                    upc_prom = :upc_prom,
+                    selling_price = :selling_price,
+                    products_number = :products_number,
+                    promotional_product = :promotional_product
+                WHERE upc = :upc;
+                """;
 
         return namedJdbc.update(sql, storeProductParameters(storeProduct));
     }
@@ -100,7 +101,6 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
         String sql = "DELETE FROM store_products WHERE upc = ?";
         return jdbc.update(sql, upc);
     }
-
 
     private List<StoreProduct> findAllByPromotionalOrNot(boolean promotional) {
         String sql = SELECT_ALL + " WHERE sp.promotional_product = ? ORDER BY sp.upc";

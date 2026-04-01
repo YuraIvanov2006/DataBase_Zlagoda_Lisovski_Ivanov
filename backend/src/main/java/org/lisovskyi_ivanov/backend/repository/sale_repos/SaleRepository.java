@@ -28,7 +28,7 @@ public interface SaleRepository {
 
     List<Sale> findAllByCustSurname(String custSurname);
 
-    List<Sale> findAllByEmployeeId(String employeeId);
+    List<Sale> findAllByEmployeeId(Long employeeId);
 
     List<Sale> findSalesByPriceRange(BigDecimal minPrice, BigDecimal maxPrice);
 

@@ -2,12 +2,12 @@ package org.lisovskyi_ivanov.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lisovskyi_ivanov.backend.entity.Category;
+import org.lisovskyi_ivanov.backend.exception.NotFoundException;
 import org.lisovskyi_ivanov.backend.repository.category_repos.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +20,12 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Category> findByCategoryNumber(Long categoryNumber) {
+    public Category findByCategoryNumber(Long categoryNumber) {
         if (categoryNumber == null) {
             throw new IllegalArgumentException("Category number must not be null");
         }
-        return repository.findByCategoryNumber(categoryNumber);
+        return repository.findByCategoryNumber(categoryNumber)
+                .orElseThrow(() -> new NotFoundException(Category.class, "categoryNumber", categoryNumber));
     }
 
     @Transactional(readOnly = true)
@@ -44,14 +45,15 @@ public class CategoryService {
     }
 
     @Transactional
-    public void update(Category category) {
+    public Category update(Category category) {
         if (category == null) {
             throw new IllegalArgumentException("Category must not be null");
         }
-        int updated = repository.update(category);
-        if (updated == 0) {
-            throw new IllegalArgumentException("Category with number " + category.getCategoryNumber() + " not found");
+        int rows = repository.update(category);
+        if (rows == 0) {
+            throw new NotFoundException(Category.class, "categoryNumber", category.getCategoryNumber());
         }
+        return category;
     }
 
     @Transactional(readOnly = true)
@@ -67,9 +69,9 @@ public class CategoryService {
         if (categoryNumber == null) {
             throw new IllegalArgumentException("Category number must not be null");
         }
-        int deleted = repository.deleteById(categoryNumber);
-        if (deleted == 0) {
-            throw new IllegalArgumentException("Category with number " + categoryNumber + " not found");
+        int rows = repository.deleteByCategoryNumber(categoryNumber);
+        if (rows == 0) {
+            throw new NotFoundException(Category.class, "categoryNumber", categoryNumber);
         }
     }
 
@@ -78,9 +80,9 @@ public class CategoryService {
         if (category == null) {
             throw new IllegalArgumentException("Category must not be null");
         }
-        int deleted = repository.delete(category);
-        if (deleted == 0) {
-            throw new IllegalArgumentException("Category with number " + category.getCategoryNumber() + " not found");
+        int rows = repository.deleteByCategoryNumber(category.getCategoryNumber());
+        if (rows == 0) {
+            throw new NotFoundException(Category.class, "categoryNumber", category.getCategoryNumber());
         }
     }
 }

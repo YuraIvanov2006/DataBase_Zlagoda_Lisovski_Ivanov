@@ -17,7 +17,9 @@ import java.util.Optional;
 public class CustomerCardRepositoryImpl implements CustomerCardRepository {
     private static final String TABLE_NAME = "customer_cards";
     private static final String SELECT_ALL =
-            "SELECT * FROM " + TABLE_NAME;
+            "SELECT card_number, cust_surname, cust_name, cust_patronymic, " +
+                    "cust_phone_number, cust_city, cust_street, cust_zip_code, percent " +
+                    "FROM " + TABLE_NAME;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
@@ -56,7 +58,9 @@ public class CustomerCardRepositoryImpl implements CustomerCardRepository {
                 """;
 
         namedJdbc.update(sql, customerCardParameters(customerCard));
-        return findByCardNumber(customerCard.getCardNumber()).orElseThrow();
+        return findByCardNumber(customerCard.getCardNumber())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Failed to save customer card with number: " + customerCard.getCardNumber()));
     }
 
     @Override
@@ -91,7 +95,7 @@ public class CustomerCardRepositoryImpl implements CustomerCardRepository {
 
     @Override
     public boolean existsById(String cardNumber) {
-        String sql = "SELECT COUNT(*) FROM customer_cards WHERE card_number = ?";
+        String sql = "SELECT COUNT(card_number) FROM customer_cards WHERE card_number = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, cardNumber);
         return count != null && count > 0;
     }

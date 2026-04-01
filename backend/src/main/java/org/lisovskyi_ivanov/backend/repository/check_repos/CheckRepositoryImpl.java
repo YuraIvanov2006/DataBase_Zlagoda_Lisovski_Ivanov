@@ -18,14 +18,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CheckRepositoryImpl implements CheckRepository {
     private static final String SELECT_ALL =
-        """
-        SELECT checks.*,
-                employees.*,
-                customer_cards.*
-        FROM checks
-        LEFT JOIN employees ON checks.id_employee = employees.id_employee
-        LEFT JOIN customer_cards ON checks.card_number = customer_cards.card_number
-        """;
+            """
+            SELECT checks.check_number, checks.id_employee, checks.card_number, 
+                   checks.print_date, checks.sum_total, checks.vat,
+                   employees.empl_surname, employees.empl_name, employees.empl_patronymic, 
+                   employees.empl_role, employees.salary, employees.date_of_birth, 
+                   employees.date_of_start, employees.empl_phone_number, employees.empl_city, 
+                   employees.empl_street, employees.empl_zip_code,
+                   customer_cards.cust_surname, customer_cards.cust_name, customer_cards.cust_patronymic, 
+                   customer_cards.cust_phone_number, customer_cards.cust_city, customer_cards.cust_street, 
+                   customer_cards.cust_zip_code, customer_cards.percent
+            FROM checks
+            LEFT JOIN employees ON checks.id_employee = employees.id_employee
+            LEFT JOIN customer_cards ON checks.card_number = customer_cards.card_number
+            """;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
@@ -38,7 +44,7 @@ public class CheckRepositoryImpl implements CheckRepository {
 
     @Override
     public Optional<Check> findByCheckNumber(String checkNumber) {
-        String sql = SELECT_ALL + " WHERE check_number = ?";
+        String sql = SELECT_ALL + " WHERE checks.check_number = ?";
         return jdbc.query(sql, checkRowMapper, checkNumber)
                 .stream()
                 .findFirst();
@@ -64,19 +70,19 @@ public class CheckRepositoryImpl implements CheckRepository {
 
     @Override
     public List<Check> findBySumTotalGreaterThan(BigDecimal sumTotal) {
-        String sql = SELECT_ALL + " WHERE sum_total > ?";
+        String sql = SELECT_ALL + " WHERE checks.sum_total > ?";
         return jdbc.query(sql, checkRowMapper, sumTotal);
     }
 
     @Override
     public List<Check> findByVatGreaterThan(BigDecimal vat) {
-        String sql = SELECT_ALL + " WHERE vat > ?";
+        String sql = SELECT_ALL + " WHERE checks.vat > ?";
         return jdbc.query(sql, checkRowMapper, vat);
     }
 
     @Override
     public boolean existsByCheckNumber(String checkNumber) {
-        String sql = "SELECT COUNT(*) FROM checks WHERE check_number = ?";
+        String sql = "SELECT COUNT(check_number) FROM checks WHERE check_number = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, checkNumber);
         return count != null && count > 0;
     }
@@ -84,14 +90,14 @@ public class CheckRepositoryImpl implements CheckRepository {
     @Override
     public Check save(Check check) {
         String sql =
-            """
-            INSERT INTO checks (
-                check_number, id_employee, card_number, print_date, sum_total, vat
-            )
-            VALUES (
-                :check_number, :id_employee, :card_number, :print_date, :sum_total, :vat
-            );
-            """;
+                """
+                INSERT INTO checks (
+                    check_number, id_employee, card_number, print_date, sum_total, vat
+                )
+                VALUES (
+                    :check_number, :id_employee, :card_number, :print_date, :sum_total, :vat
+                );
+                """;
 
         namedJdbc.update(sql, checkParameters(check));
         return findByCheckNumber(check.getCheckNumber()).orElseThrow();
@@ -100,15 +106,15 @@ public class CheckRepositoryImpl implements CheckRepository {
     @Override
     public int update(Check check) {
         String sql =
-            """
-            UPDATE checks SET
-                id_employee = :id_employee,
-                card_number = :card_number,
-                print_date = :print_date,
-                sum_total = :sum_total,
-                vat = :vat
-            WHERE check_number = :check_number
-            """;
+                """
+                UPDATE checks SET
+                    id_employee = :id_employee,
+                    card_number = :card_number,
+                    print_date = :print_date,
+                    sum_total = :sum_total,
+                    vat = :vat
+                WHERE check_number = :check_number
+                """;
         return namedJdbc.update(sql, checkParameters(check));
     }
 
@@ -123,6 +129,7 @@ public class CheckRepositoryImpl implements CheckRepository {
         return jdbc.update(sql, checkNumber);
     }
 
+    // Ось цей метод був відсутній у вас на скріншоті
     private SqlParameterSource checkParameters(Check check) {
         return new MapSqlParameterSource()
                 .addValue("check_number", check.getCheckNumber())

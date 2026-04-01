@@ -92,11 +92,11 @@ class CategoryRepositoryTest {
     }
 
     @Test
-    void deleteById_shouldRemoveCategory_whenExists() {
+    void deleteByCategoryNumber_shouldRemoveCategory_whenExists() {
         var savedCategory = categoryRepository.save(buildTestCategory("Sweets"));
         var testId = savedCategory.getCategoryNumber();
 
-        categoryRepository.deleteById(testId);
+        categoryRepository.deleteByCategoryNumber(testId);
 
         var deletedCategory = categoryRepository.findByCategoryNumber(testId);
         assertTrue(deletedCategory.isEmpty());

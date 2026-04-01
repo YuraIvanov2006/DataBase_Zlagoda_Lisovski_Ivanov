@@ -11,7 +11,7 @@ public interface CustomerCardRepository {
     Optional<CustomerCard> findByCardNumber(String cardNumber);
     CustomerCard save(CustomerCard customerCard);
     int update(CustomerCard customerCard);
+    boolean existsById(String cardNumber);
     int delete(CustomerCard customerCard);
     int deleteById(String cardNumber);
-    boolean existsById(String cardNumber);
 }

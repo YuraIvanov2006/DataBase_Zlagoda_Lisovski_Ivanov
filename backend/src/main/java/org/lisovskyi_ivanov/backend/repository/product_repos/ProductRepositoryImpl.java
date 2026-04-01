@@ -19,7 +19,9 @@ import java.util.Optional;
 public class ProductRepositoryImpl implements ProductRepository {
     private static final String SELECT_ALL =
             """
-            SELECT *
+            SELECT products.id_product, products.category_number, products.product_name, 
+                   products.manufacturer, products.characteristics,
+                   categories.category_name
             FROM products
             LEFT JOIN categories ON products.category_number = categories.category_number
             """;
@@ -72,7 +74,8 @@ public class ProductRepositoryImpl implements ProductRepository {
         namedJdbc.update(sql, productParameters(product), keyHolder, new String[] {"id_product"});
 
         Long generatedId = keyHolder.getKeyAs(Long.class);
-        return findById(generatedId).orElseThrow();
+        return findById(generatedId)
+                .orElseThrow(() -> new IllegalStateException("Failed to save product with ID: " + generatedId));
     }
 
     @Override
@@ -92,7 +95,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public boolean existsById(Long id) {
-        String sql = "SELECT COUNT(*) FROM products WHERE id_product = ?";
+        String sql = "SELECT COUNT(id_product) FROM products WHERE id_product = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }
@@ -101,11 +104,6 @@ public class ProductRepositoryImpl implements ProductRepository {
     public int deleteById(Long id) {
         String sql = "DELETE FROM products WHERE id_product = ?";
         return jdbc.update(sql, id);
-    }
-
-    @Override
-    public int delete(Product product) {
-        return deleteById(product.getIdProduct());
     }
 
     private SqlParameterSource productParameters(Product product) {

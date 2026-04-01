@@ -25,7 +25,6 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     private final NamedParameterJdbcTemplate namedJdbc;
     private final CategoryRowMapper categoryRowMapper;
 
-
     @Override
     public List<Category> findAll() {
         return jdbc.query(SELECT_ALL + " ORDER BY category_name", categoryRowMapper);
@@ -48,48 +47,43 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     @Override
     public Category save(Category category) {
         String sql =
-            """
-            INSERT INTO categories (category_name)
-            VALUES (:category_name);
-            """;
+                """
+                INSERT INTO categories (category_name)
+                VALUES (:category_name);
+                """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedJdbc.update(sql, categoryParameters(category), keyHolder, new String[] {"category_number"});
 
         Long generatedId = keyHolder.getKeyAs(Long.class);
-        return findByCategoryNumber(generatedId).orElseThrow();
+        return findByCategoryNumber(generatedId)
+                .orElseThrow(() -> new IllegalStateException("Failed to save category with ID: " + generatedId));
     }
 
     @Override
     public int update(Category category) {
         String sql =
-        """
-        UPDATE categories SET
-            category_name = :category_name
-        WHERE category_number = :category_number;
-        """;
+                """
+                UPDATE categories SET
+                    category_name = :category_name
+                WHERE category_number = :category_number;
+                """;
 
         return namedJdbc.update(sql, categoryParameters(category));
     }
 
     @Override
-    public int delete(Category category) {
-        return deleteById(category.getCategoryNumber());
-    }
-
-    @Override
-    public int deleteById(Long id) {
+    public int deleteByCategoryNumber(Long categoryNumber) {
         String sql = "DELETE FROM categories WHERE category_number = ?";
-        return jdbc.update(sql, id);
+        return jdbc.update(sql, categoryNumber);
     }
 
     @Override
-    public boolean existsById(Long id) {
-        String sql = "SELECT COUNT(*) FROM categories WHERE category_number = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, id);
+    public boolean existsById(Long categoryNumber) {
+        String sql = "SELECT COUNT(category_number) FROM categories WHERE category_number = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, categoryNumber);
         return count != null && count > 0;
     }
-
 
     private SqlParameterSource categoryParameters(Category category) {
         return new MapSqlParameterSource()
