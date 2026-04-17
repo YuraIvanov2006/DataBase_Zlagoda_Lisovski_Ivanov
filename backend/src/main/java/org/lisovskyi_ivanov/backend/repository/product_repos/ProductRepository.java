@@ -15,4 +15,5 @@ public interface ProductRepository {
     int update(Product product);
     boolean existsById(Long id);
     int deleteById(Long id);
+    List<Product> findAllByProductNameContaining(String name);
 }

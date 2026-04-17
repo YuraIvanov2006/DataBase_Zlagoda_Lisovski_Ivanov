@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class Check {
-    @Setter
     private String checkNumber;
     private Employee employee;
     private CustomerCard customerCard;

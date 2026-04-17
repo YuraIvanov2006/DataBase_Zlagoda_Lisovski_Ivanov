@@ -2,6 +2,7 @@ package org.lisovskyi_ivanov.backend.repository.customer_card_repos;
 
 import org.lisovskyi_ivanov.backend.entity.CustomerCard;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,4 +15,5 @@ public interface CustomerCardRepository {
     boolean existsById(String cardNumber);
     int delete(CustomerCard customerCard);
     int deleteById(String cardNumber);
+    List<CustomerCard> findAllByPercent(BigDecimal percent);
 }

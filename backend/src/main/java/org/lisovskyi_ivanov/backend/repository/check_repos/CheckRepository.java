@@ -20,4 +20,8 @@ public interface CheckRepository {
     int update(Check check);
     int delete(Check check);
     int deleteByCheckNumber(String checkNumber);
+    List<Check> findByEmployeeIdAndPrintDateBetween(Long employeeId, LocalDateTime from, LocalDateTime to);
+    List<Check> findByPrintDateBetween(LocalDateTime from, LocalDateTime to);
+    BigDecimal calculateTotalSumByEmployeeAndPeriod(Long employeeId, LocalDateTime from, LocalDateTime to);
+    BigDecimal calculateTotalSumByPeriod(LocalDateTime from, LocalDateTime to);
 }

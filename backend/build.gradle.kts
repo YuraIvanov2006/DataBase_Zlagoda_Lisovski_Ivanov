@@ -26,6 +26,7 @@ repositories {
 
 val dotenvVersion = "4.0.0"
 val apacheCommonsVersion = "3.20.0";
+val jwtVersion = "0.13.0";
 
 extra["h2.version"] = "2.2.224"
 
@@ -43,6 +44,8 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("me.paulschwarz:spring-dotenv:${dotenvVersion}")
     implementation("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
+    implementation("io.jsonwebtoken:jjwt-api:${jwtVersion}")
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -51,9 +54,12 @@ dependencies {
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${jwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jwtVersion}")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")

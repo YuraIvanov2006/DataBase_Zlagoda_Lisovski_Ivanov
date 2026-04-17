@@ -20,9 +20,9 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     private static final String SELECT_ALL =
             """
-            SELECT a.id_account, a.id_employee, a.login, a.password, a.authority,
-                   e.empl_surname, e.empl_name, e.empl_patronymic, e.empl_role, 
-                   e.salary, e.date_of_birth, e.date_of_start, e.empl_phone_number, 
+            SELECT a.id_account, a.id_employee, a.login, a.password,
+                   e.empl_surname, e.empl_name, e.empl_patronymic, e.empl_role,
+                   e.salary, e.date_of_birth, e.date_of_start, e.empl_phone_number,
                    e.empl_city, e.empl_street, e.empl_zip_code
             FROM accounts a
             JOIN employees e ON a.id_employee = e.id_employee
@@ -53,8 +53,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     public Account save(Account account) {
         String sql =
                 """
-                INSERT INTO accounts (id_employee, login, password, authority)
-                VALUES (:id_employee, :login, :password, :authority);
+                INSERT INTO accounts (id_employee, login, password)
+                VALUES (:id_employee, :login, :password);
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -71,8 +71,7 @@ public class AccountRepositoryImpl implements AccountRepository {
                 UPDATE accounts SET
                     id_employee = :id_employee,
                     login = :login,
-                    password = :password,
-                    authority = :authority
+                    password = :password
                 WHERE id_account = :id_account;
                 """;
 
@@ -109,7 +108,6 @@ public class AccountRepositoryImpl implements AccountRepository {
                 .addValue("id_account", account.getIdAccount())
                 .addValue("id_employee", account.getEmployee() != null ? account.getEmployee().getIdEmployee() : null)
                 .addValue("login", account.getLogin())
-                .addValue("password", account.getPassword())
-                .addValue("authority", account.getAuthority() != null ? account.getAuthority().name() : null);
+                .addValue("password", account.getPassword());
     }
 }

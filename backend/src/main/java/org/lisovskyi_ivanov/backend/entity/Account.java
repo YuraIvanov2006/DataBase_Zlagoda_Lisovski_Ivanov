@@ -2,7 +2,6 @@ package org.lisovskyi_ivanov.backend.entity;
 
 import lombok.*;
 import org.jspecify.annotations.Nullable;
-import org.lisovskyi_ivanov.backend.enums.Authority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,8 +15,6 @@ public class Account implements UserDetails {
     private Employee employee;
     private String login;
     private String password;
-    @Getter
-    private Authority authority;
 
     @Override
     public String getUsername() {
@@ -31,7 +28,7 @@ public class Account implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(employee.getEmplRole().name()));
+        return List.of(new SimpleGrantedAuthority(employee.getEmplRole().getRoleName()));
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -164,5 +165,19 @@ public class SaleRepositoryImpl implements SaleRepository {
                 .addValue("check_number", sale.getCheck() != null ? sale.getCheck().getCheckNumber() : null)
                 .addValue("product_number", sale.getProductNumber())
                 .addValue("selling_price", sale.getSellingPrice());
+    }
+    @Override
+    public Integer countTotalProductsSoldByUpcAndPeriod(String upc, LocalDateTime from, LocalDateTime to) {
+        String sql = """
+            SELECT COALESCE(SUM(s.product_number), 0) 
+            FROM sales s
+            JOIN checks ch ON s.check_number = ch.check_number
+            WHERE s.upc = :upc AND ch.print_date BETWEEN :from AND :to
+            """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("upc", upc)
+                .addValue("from", from)
+                .addValue("to", to);
+        return namedJdbc.queryForObject(sql, params, Integer.class);
     }
 }

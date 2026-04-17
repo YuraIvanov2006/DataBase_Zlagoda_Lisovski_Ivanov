@@ -1,7 +1,6 @@
 package org.lisovskyi_ivanov.backend.mapping.object;
 
 import org.lisovskyi_ivanov.backend.entity.Account;
-import org.lisovskyi_ivanov.backend.enums.Authority;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +18,6 @@ public final class AccountObject {
                 .employee(employee)
                 .login(rs.getString("login"))
                 .password(rs.getString("password"))
-                .authority(Authority.getRoleFromString(rs.getString("authority")).orElse(null))
                 .build();
     }
 }

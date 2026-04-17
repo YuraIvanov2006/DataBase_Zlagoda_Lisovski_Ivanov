@@ -1,56 +1,66 @@
-//package org.lisovskyi_ivanov.backend.controller;
-//
-//import lombok.RequiredArgsConstructor;
-//import org.lisovskyi_ivanov.backend.entity.Check;
-//import org.lisovskyi_ivanov.backend.service.CheckService;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/api/checks")
-//@RequiredArgsConstructor
-//public class CheckController {
-//
-//    private final CheckService checkService;
-//
-//    // GET /api/checks - Отримати список всіх чеків
-//    @GetMapping
-//    public ResponseEntity<List<Check>> getAllChecks() {
-//        List<Check> checks = checkService.findAll();
-//        return ResponseEntity.ok(checks);
-//    }
-//
-//    // GET /api/checks/{checkNumber} - Отримати конкретний чек за номером
-////    @GetMapping("/{checkNumber}")
-////    public ResponseEntity<Check> getCheckById(@PathVariable String checkNumber) {
-////        return checkService.findAllByEmployeeId(Long.valueOf(checkNumber))
-////                .stream()
-////                .map(ResponseEntity::ok)
-////                .orElse(ResponseEntity.notFound().build()); // Поверне 404, якщо чек не знайдено
-////    }
-//
-//    // POST /api/checks - Створити новий чек
-//    @PostMapping
-//    public ResponseEntity<Check> createCheck(@RequestBody Check check) {
-//        Check savedCheck = checkService.save(check);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(savedCheck); // Поверне 201 Created
-//    }
-//
-//    // PUT /api/checks/{checkNumber} - Оновити існуючий чек
-//    @PutMapping("/{checkNumber}")
-//    public ResponseEntity<Void> updateCheck(@PathVariable String checkNumber, @RequestBody Check check) {
-//        // Зазвичай тут варто переконатися, що ID в URL збігається з ID в тілі запиту
-//        checkService.update(check);
-//        return ResponseEntity.ok().build();
-//    }
-//
-//    // DELETE /api/checks/{checkNumber} - Видалити чек
-//    @DeleteMapping("/{checkNumber}")
-//    public ResponseEntity<Void> deleteCheck(@PathVariable String checkNumber) {
-//        checkService.deleteById(checkNumber);
-//        return ResponseEntity.noContent().build(); // Поверне 204 No Content після успішного видалення
-//    }
-//}
+package org.lisovskyi_ivanov.backend.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.lisovskyi_ivanov.backend.dto.request.CheckRequest;
+import org.lisovskyi_ivanov.backend.dto.response.CheckDto;
+import org.lisovskyi_ivanov.backend.entity.Check;
+import org.lisovskyi_ivanov.backend.mapping.dto.CheckMapper;
+import org.lisovskyi_ivanov.backend.service.CheckService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/checks")
+@RequiredArgsConstructor
+public class CheckController {
+    private final CheckService checkService;
+    private final CheckMapper checkMapper;
+
+    // -- GET
+    @GetMapping
+    public ResponseEntity<List<CheckDto>> getAllChecks() {
+        List<CheckDto> checks = checkService.findAll().stream()
+                .map(checkMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(checks);
+    }
+
+    @GetMapping("/{checkNumber}")
+    public ResponseEntity<CheckDto> getCheckById(@PathVariable String checkNumber) {
+        Check check = checkService.findByCheckNumber(checkNumber);
+        return ResponseEntity.ok(checkMapper.toDto(check));
+    }
+
+    // -- POST
+    @PostMapping
+    public ResponseEntity<CheckDto> createCheck(@Valid @RequestBody CheckRequest request) {
+        Check checkToSave = checkMapper.toEntity(request);
+        Check savedCheck = checkService.save(checkToSave);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(checkMapper.toDto(savedCheck));
+    }
+
+    // -- PUT
+    @PutMapping("/{checkNumber}")
+    public ResponseEntity<CheckDto> updateCheck(
+            @PathVariable String checkNumber,
+            @Valid @RequestBody CheckRequest request) {
+
+        Check checkToUpdate = checkMapper.toEntity(request);
+        checkToUpdate.setCheckNumber(checkNumber); // Захист від перезапису іншого чеку
+
+        Check updatedCheck = checkService.update(checkToUpdate);
+        return ResponseEntity.ok(checkMapper.toDto(updatedCheck));
+    }
+
+    // -- DELETE
+    @DeleteMapping("/{checkNumber}")
+    public ResponseEntity<Void> deleteCheck(@PathVariable String checkNumber) {
+        checkService.deleteByCheckNumber(checkNumber);
+        return ResponseEntity.noContent().build();
+    }
+}

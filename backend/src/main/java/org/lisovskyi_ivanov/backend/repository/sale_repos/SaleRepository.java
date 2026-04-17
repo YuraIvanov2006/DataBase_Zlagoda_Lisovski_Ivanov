@@ -3,6 +3,7 @@ package org.lisovskyi_ivanov.backend.repository.sale_repos;
 import org.lisovskyi_ivanov.backend.entity.Sale;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,4 +40,6 @@ public interface SaleRepository {
     Integer countTotalProductsSoldByUpc(String upc);
 
     int deleteAllByCheckNumber(String checkNumber);
+
+    Integer countTotalProductsSoldByUpcAndPeriod(String upc, LocalDateTime from, LocalDateTime to);
 }

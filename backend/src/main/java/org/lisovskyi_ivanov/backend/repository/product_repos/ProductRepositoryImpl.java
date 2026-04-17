@@ -114,4 +114,11 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .addValue("manufacturer", product.getManufacturer())
                 .addValue("characteristics", product.getCharacteristics());
     }
+    @Override
+    public List<Product> findAllByProductNameContaining(String name) {
+        // Використовуємо ILIKE для PostgreSQL (нечутливий до регістру) або LIKE для MySQL
+        String sql = SELECT_ALL + " WHERE products.product_name ILIKE :name ORDER BY products.product_name ASC";
+        MapSqlParameterSource params = new MapSqlParameterSource("name", "%" + name + "%");
+        return namedJdbc.query(sql, params, productRowMapper);
+    }
 }

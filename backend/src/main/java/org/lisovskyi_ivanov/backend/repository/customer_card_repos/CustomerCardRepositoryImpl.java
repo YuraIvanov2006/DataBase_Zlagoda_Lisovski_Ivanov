@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -111,5 +112,10 @@ public class CustomerCardRepositoryImpl implements CustomerCardRepository {
                 .addValue("cust_street", customerCard.getCustStreet())
                 .addValue("cust_zip_code", customerCard.getCustZipCode())
                 .addValue("percent", customerCard.getPercent());
+    }
+    @Override
+    public List<CustomerCard> findAllByPercent(BigDecimal percent) {
+        String sql = SELECT_ALL + " WHERE percent = ? ORDER BY cust_surname ASC";
+        return jdbc.query(sql, customerCardRowMapper, percent);
     }
 }

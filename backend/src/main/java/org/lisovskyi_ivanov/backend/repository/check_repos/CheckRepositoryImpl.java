@@ -139,4 +139,42 @@ public class CheckRepositoryImpl implements CheckRepository {
                 .addValue("sum_total", check.getSumTotal())
                 .addValue("vat", check.getVat());
     }
+
+    @Override
+    public List<Check> findByEmployeeIdAndPrintDateBetween(Long employeeId, LocalDateTime from, LocalDateTime to) {
+        String sql = SELECT_ALL + " WHERE checks.id_employee = :employeeId AND checks.print_date BETWEEN :from AND :to";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("employeeId", employeeId)
+                .addValue("from", from)
+                .addValue("to", to);
+        return namedJdbc.query(sql, params, checkRowMapper);
+    }
+
+    @Override
+    public List<Check> findByPrintDateBetween(LocalDateTime from, LocalDateTime to) {
+        String sql = SELECT_ALL + " WHERE checks.print_date BETWEEN :from AND :to";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("from", from)
+                .addValue("to", to);
+        return namedJdbc.query(sql, params, checkRowMapper);
+    }
+
+    @Override
+    public BigDecimal calculateTotalSumByEmployeeAndPeriod(Long employeeId, LocalDateTime from, LocalDateTime to) {
+        String sql = "SELECT COALESCE(SUM(sum_total), 0) FROM checks WHERE id_employee = :employeeId AND print_date BETWEEN :from AND :to";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("employeeId", employeeId)
+                .addValue("from", from)
+                .addValue("to", to);
+        return namedJdbc.queryForObject(sql, params, BigDecimal.class);
+    }
+
+    @Override
+    public BigDecimal calculateTotalSumByPeriod(LocalDateTime from, LocalDateTime to) {
+        String sql = "SELECT COALESCE(SUM(sum_total), 0) FROM checks WHERE print_date BETWEEN :from AND :to";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("from", from)
+                .addValue("to", to);
+        return namedJdbc.queryForObject(sql, params, BigDecimal.class);
+    }
 }

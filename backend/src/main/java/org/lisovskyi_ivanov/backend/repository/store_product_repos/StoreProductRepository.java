@@ -15,4 +15,9 @@ public interface StoreProductRepository {
     int update(StoreProduct storeProduct);
     int delete(StoreProduct storeProduct);
     int deleteByUPC(String upc);
+    List<StoreProduct> findAllPromotionalOrderByProductsNumber();
+    List<StoreProduct> findAllPromotionalOrderByProductName();
+    List<StoreProduct> findAllNotPromotionalOrderByProductsNumber();
+    List<StoreProduct> findAllNotPromotionalOrderByProductName();
+    List<StoreProduct> findAllByCategoryNumber(Long categoryNumber);
 }

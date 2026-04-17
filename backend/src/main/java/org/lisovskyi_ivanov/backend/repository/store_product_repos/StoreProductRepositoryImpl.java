@@ -116,4 +116,33 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
                 .addValue("products_number", storeProduct.getProductsNumber())
                 .addValue("promotional_product", storeProduct.isPromotionalProduct());
     }
+    @Override
+    public List<StoreProduct> findAllPromotionalOrderByProductsNumber() {
+        String sql = SELECT_ALL + " WHERE sp.promotional_product = true ORDER BY sp.products_number ASC";
+        return jdbc.query(sql, storeProductRowMapper);
+    }
+
+    @Override
+    public List<StoreProduct> findAllPromotionalOrderByProductName() {
+        String sql = SELECT_ALL + " WHERE sp.promotional_product = true ORDER BY p.product_name ASC";
+        return jdbc.query(sql, storeProductRowMapper);
+    }
+
+    @Override
+    public List<StoreProduct> findAllNotPromotionalOrderByProductsNumber() {
+        String sql = SELECT_ALL + " WHERE sp.promotional_product = false ORDER BY sp.products_number ASC";
+        return jdbc.query(sql, storeProductRowMapper);
+    }
+
+    @Override
+    public List<StoreProduct> findAllNotPromotionalOrderByProductName() {
+        String sql = SELECT_ALL + " WHERE sp.promotional_product = false ORDER BY p.product_name ASC";
+        return jdbc.query(sql, storeProductRowMapper);
+    }
+
+    @Override
+    public List<StoreProduct> findAllByCategoryNumber(Long categoryNumber) {
+        String sql = SELECT_ALL + " WHERE p.category_number = ?";
+        return jdbc.query(sql, storeProductRowMapper, categoryNumber);
+    }
 }
