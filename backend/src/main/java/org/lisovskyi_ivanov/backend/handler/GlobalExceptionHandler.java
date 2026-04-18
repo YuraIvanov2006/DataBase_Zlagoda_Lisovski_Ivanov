@@ -1,6 +1,7 @@
 package org.lisovskyi_ivanov.backend.handler;
 
 import org.lisovskyi_ivanov.backend.exception.ErrorResponse;
+import org.lisovskyi_ivanov.backend.exception.ExportException;
 import org.lisovskyi_ivanov.backend.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException e) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid login or password");
+    }
+
+    @ExceptionHandler(ExportException.class)
+    public ResponseEntity<ErrorResponse> handleExportException(ExportException e) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()); // 500
     }
 
     @ExceptionHandler(Exception.class)

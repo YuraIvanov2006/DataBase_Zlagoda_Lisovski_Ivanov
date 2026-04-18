@@ -27,6 +27,9 @@ repositories {
 val dotenvVersion = "4.0.0"
 val apacheCommonsVersion = "3.20.0";
 val jwtVersion = "0.13.0";
+val mapStruct = "1.5.5.Final";
+val pdfVersion = "3.0.3";
+val excelVersion = "5.5.1";
 
 extra["h2.version"] = "2.2.224"
 
@@ -45,7 +48,11 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:${dotenvVersion}")
     implementation("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
     implementation("io.jsonwebtoken:jjwt-api:${jwtVersion}")
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    implementation("org.mapstruct:mapstruct:${mapStruct}")
+    // pdf
+    implementation("com.github.librepdf:openpdf:${pdfVersion}")
+    // Excel
+    implementation("org.apache.poi:poi-ooxml:${excelVersion}")
 
     compileOnly("org.projectlombok:lombok")
 
