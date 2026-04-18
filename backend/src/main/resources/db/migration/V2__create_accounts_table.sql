@@ -1,3 +1,4 @@
+-- create accounts `table`
 CREATE TABLE accounts (
     id_account  BIGSERIAL PRIMARY KEY,
     id_employee BIGINT       NOT NULL UNIQUE,

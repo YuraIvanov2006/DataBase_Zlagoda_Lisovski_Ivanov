@@ -1,2 +1,2 @@
--- V3__remove_authority_from_accounts.sql
+-- remove authority from accounts
 ALTER TABLE accounts DROP COLUMN IF EXISTS authority;
