@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -113,21 +114,28 @@ public class EmployeeService {
 
     @Transactional
     public Employee save(Employee employee) {
-        if (employee == null) {
+        if (employee == null)
             throw new IllegalArgumentException("Employee must not be null");
-        }
+
+        validateAge(employee.getDateOfBirth());
+        validatePhone(employee.getEmplPhoneNumber());
+        validateSalary(employee.getSalary());
+
         return repository.save(employee);
     }
 
     @Transactional
     public Employee update(Employee employee) {
-        if (employee == null) {
+        if (employee == null)
             throw new IllegalArgumentException("Employee must not be null");
-        }
+
+        validateAge(employee.getDateOfBirth());
+        validatePhone(employee.getEmplPhoneNumber());
+        validateSalary(employee.getSalary());
+
         int rows = repository.update(employee);
-        if (rows == 0) {
+        if (rows == 0)
             throw new NotFoundException(Employee.class, "id", employee.getIdEmployee());
-        }
         return employee;
     }
 
@@ -159,6 +167,32 @@ public class EmployeeService {
         if (rows == 0) {
             throw new NotFoundException(Employee.class, "id", employee.getIdEmployee());
         }
+    }
+
+
+    // private methods
+    private void validateAge(java.time.LocalDate dateOfBirth) {
+        if (dateOfBirth == null)
+            throw new IllegalArgumentException("Date of birth must not be null");
+        if (dateOfBirth.isAfter(LocalDate.now().minusYears(18)))
+            throw new IllegalArgumentException("Employee must be at least 18 years old");
+    }
+
+    private void validatePhone(String phone) {
+        if (phone == null || phone.isBlank())
+            throw new IllegalArgumentException("Phone number must not be null or blank");
+        if (!phone.startsWith("+"))
+            throw new IllegalArgumentException("Phone number must start with '+'");
+        if (phone.length() > 13)
+            throw new IllegalArgumentException(
+                    "Phone number must not exceed 13 characters including '+'");
+    }
+
+    private void validateSalary(BigDecimal salary) {
+        if (salary == null)
+            throw new IllegalArgumentException("Salary must not be null");
+        if (salary.compareTo(BigDecimal.ZERO) < 0)
+            throw new IllegalArgumentException("Salary must not be negative");
     }
 }
 

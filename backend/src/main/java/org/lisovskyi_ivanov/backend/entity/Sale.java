@@ -1,13 +1,10 @@
 package org.lisovskyi_ivanov.backend.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @ToString(exclude = "check") @EqualsAndHashCode(exclude = "check")
 public class Sale {
     private StoreProduct storeProduct;
     private Check check;

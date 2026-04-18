@@ -10,6 +10,7 @@ public interface StoreProductRepository {
     List<StoreProduct> findAllPromotional();
     List<StoreProduct> findAllNotPromotional();
     List<StoreProduct> findAllByProductId(Long productId);
+    List<StoreProduct> findAllByBaseProductUpc(String baseUpc);
     Optional<StoreProduct> findByUPC(String upc);
     StoreProduct save(StoreProduct storeProduct);
     int update(StoreProduct storeProduct);

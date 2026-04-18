@@ -53,6 +53,12 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
     }
 
     @Override
+    public List<StoreProduct> findAllByBaseProductUpc(String baseUpc) {
+        String sql = SELECT_ALL + " FROM store_products WHERE upc_prom = ?";
+        return jdbc.query(sql, storeProductRowMapper, baseUpc);
+    }
+
+    @Override
     public Optional<StoreProduct> findByUPC(String upc) {
         String sql = SELECT_ALL + " WHERE sp.upc = ?";
         return jdbc.query(sql, storeProductRowMapper, upc)
