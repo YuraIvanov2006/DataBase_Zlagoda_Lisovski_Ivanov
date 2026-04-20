@@ -18,7 +18,7 @@ public interface SaleMapper {
     SaleDto toDto(Sale sale);
 
     // Request -> Entity
-    @Mapping(target = "storeProduct", ignore = true)
+    @Mapping(target = "storeProduct.upc", source = "upc")
     @Mapping(target = "check",        ignore = true)
     @Mapping(target = "sellingPrice", ignore = true)
     Sale toEntity(SaleRequest request);

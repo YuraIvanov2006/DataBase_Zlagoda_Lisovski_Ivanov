@@ -69,44 +69,42 @@ export function CashierReceiptsPage() {
     setLoading(true);
     setError('');
     try {
-      const { data } = await checksApi.getAll();
+      const params: any = { employeeId: Number(employeeId) };
+      
+      if (mode === 'today') {
+        const today = new Date();
+        const start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+        params.from = start.toISOString();
+        params.to = end.toISOString();
+      } else if (mode === 'range' && dateFrom && dateTo) {
+        params.from = parseDayStart(dateFrom).toISOString();
+        params.to = parseDayEnd(dateTo).toISOString();
+      }
+
+      // Якщо 'range' але дати не вибрані, ми завантажуємо всі чеки цього касира
+      const { data } = await checksApi.getFiltered(params);
       setChecks((data as CheckRow[]) || []);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [employeeId, mode, dateFrom, dateTo]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const mine = useMemo(
-    () =>
-      checks.filter((c) => String(c.employeeId) === String(employeeId)),
-    [checks, employeeId]
-  );
-
-  const filtered = useMemo(() => {
-    if (mode === 'today') return mine.filter((c) => isToday(c.printDate));
-    if (mode === 'range' && dateFrom && dateTo) {
-      const from = parseDayStart(dateFrom);
-      const to = parseDayEnd(dateTo);
-      return mine.filter((c) => inRange(c.printDate, from, to));
-    }
-    return mine;
-  }, [mine, mode, dateFrom, dateTo]);
-
   const sortedRows = useMemo(
     () =>
       sortRows(
-        filtered,
+        checks,
         sortState.key,
         sortState.dir,
         (sortState.type || 'string') as SortValueType
       ),
-    [filtered, sortState]
+    [checks, sortState]
   );
 
   const onSort = (key: string, type?: SortValueType) => {

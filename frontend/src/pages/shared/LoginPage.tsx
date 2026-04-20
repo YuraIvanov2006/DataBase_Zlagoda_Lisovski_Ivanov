@@ -15,10 +15,6 @@ export function LoginPage() {
 
   const loading = authLoading || localLoading;
 
-  const devManagerLogin = import.meta.env.VITE_DEV_MANAGER_LOGIN || "";
-  const devManagerPass = import.meta.env.VITE_DEV_MANAGER_PASSWORD || "";
-  const devCashierLogin = import.meta.env.VITE_DEV_CASHIER_LOGIN || "";
-  const devCashierPass = import.meta.env.VITE_DEV_CASHIER_PASSWORD || "";
 
   if (isAuthenticated) {
     return (
@@ -46,16 +42,6 @@ export function LoginPage() {
     }
   };
 
-  const fillDev = (preset: "manager" | "cashier") => {
-    if (preset === "manager" && devManagerLogin) {
-      setLogin(devManagerLogin);
-      setPassword(devManagerPass);
-    }
-    if (preset === "cashier" && devCashierLogin) {
-      setLogin(devCashierLogin);
-      setPassword(devCashierPass);
-    }
-  };
 
   return (
     <div className={styles.page}>
@@ -91,29 +77,7 @@ export function LoginPage() {
           </button>
         </form>
 
-        {import.meta.env.DEV && (
-          <div className={styles.dev}>
-            <div className={styles.devTitle}>Швидкий вибір (dev)</div>
-            <div className={styles.devBtns}>
-              <button
-                type="button"
-                className="btn secondary small"
-                onClick={() => fillDev("manager")}
-                disabled={!devManagerLogin}
-              >
-                Менеджер
-              </button>
-              <button
-                type="button"
-                className="btn secondary small"
-                onClick={() => fillDev("cashier")}
-                disabled={!devCashierLogin}
-              >
-                Касир
-              </button>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );

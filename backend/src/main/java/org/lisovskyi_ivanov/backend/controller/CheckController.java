@@ -53,4 +53,42 @@ public class CheckController {
         checkService.deleteByCheckNumber(checkNumber);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<CheckDto>> getFilteredChecks(
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime from,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime to) {
+        
+        List<CheckDto> checks;
+        if (employeeId != null && from != null && to != null) {
+            checks = checkService.findByEmployeeIdAndPrintDateBetween(employeeId, from, to).stream()
+                    .map(checkMapper::toDto).toList();
+        } else if (from != null && to != null) {
+            checks = checkService.findByPrintDateBetween(from, to).stream()
+                    .map(checkMapper::toDto).toList();
+        } else if (employeeId != null) {
+            checks = checkService.findAllByEmployeeId(employeeId).stream()
+                    .map(checkMapper::toDto).toList();
+        } else {
+            checks = checkService.findAll().stream()
+                    .map(checkMapper::toDto).toList();
+        }
+        return ResponseEntity.ok(checks);
+    }
+
+    @GetMapping("/sum")
+    public ResponseEntity<java.math.BigDecimal> getTotalSum(
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime from,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime to) {
+        
+        java.math.BigDecimal sum;
+        if (employeeId != null) {
+            sum = checkService.calculateTotalSumByEmployeeAndPeriod(employeeId, from, to);
+        } else {
+            sum = checkService.calculateTotalSumByPeriod(from, to);
+        }
+        return ResponseEntity.ok(sum != null ? sum : java.math.BigDecimal.ZERO);
+    }
 }

@@ -60,22 +60,57 @@ export function ManagerReceiptsPage() {
     type: 'string',
   });
 
+  const [totalSumCashier, setTotalSumCashier] = useState<number | null>(null);
+  const [totalSumAllInPeriod, setTotalSumAllInPeriod] = useState<number | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const [ch, em] = await Promise.all([
-        checksApi.getAll(),
+      const fromD = dateFrom ? parseDayStart(dateFrom).toISOString() : undefined;
+      const toD = dateTo ? parseDayEnd(dateTo).toISOString() : undefined;
+      const params: any = {};
+      if (cashierId) params.employeeId = Number(cashierId);
+      if (fromD && toD) {
+        params.from = fromD;
+        params.to = toD;
+      }
+
+      const chReq = checksApi.getFiltered(params);
+      let sumReq = null;
+      let sumAllReq = null;
+      if (fromD && toD) {
+        sumReq = checksApi.getSum(params as any);
+        sumAllReq = checksApi.getSum({ from: fromD, to: toD });
+      }
+
+      const [ch, em, sumRes, sumAllRes] = await Promise.all([
+        chReq,
         employeesApi.getCashiers(),
+        sumReq || Promise.resolve(null),
+        sumAllReq || Promise.resolve(null)
       ]);
       setChecks((ch.data as CheckRow[]) || []);
       setCashiers((em.data as CashierOpt[]) || []);
+      
+      // Якщо немає діапазону, рахуємо локально з отриманих чеків
+      if (!sumRes) {
+        setTotalSumCashier((ch.data as CheckRow[]).reduce((s, c) => s + Number(c.sumTotal || 0), 0));
+      } else {
+        setTotalSumCashier(Number(sumRes.data) || 0);
+      }
+      
+      if (sumAllRes) {
+        setTotalSumAllInPeriod(Number(sumAllRes.data) || 0);
+      } else {
+        setTotalSumAllInPeriod(null);
+      }
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [cashierId, dateFrom, dateTo]);
 
   useEffect(() => {
     load();
@@ -84,59 +119,32 @@ export function ManagerReceiptsPage() {
   const fromD = dateFrom ? parseDayStart(dateFrom) : null;
   const toD = dateTo ? parseDayEnd(dateTo) : null;
 
-  const filtered = useMemo(() => {
-    return checks.filter((c) => {
-      if (cashierId && String(c.employeeId) !== String(cashierId))
-        return false;
-      if (fromD && toD && !inRange(c.printDate, fromD, toD)) return false;
-      return true;
-    });
-  }, [checks, cashierId, fromD, toD, dateFrom, dateTo]);
-
   const sortedRows = useMemo(
     () =>
       sortRows(
-        filtered,
+        checks,
         sortState.key,
         sortState.dir,
         (sortState.type || 'string') as SortValueType
       ),
-    [filtered, sortState]
+    [checks, sortState]
   );
-
-  const totalSumCashier = useMemo(() => {
-    return filtered.reduce((s, c) => s + Number(c.sumTotal || 0), 0);
-  }, [filtered]);
-
-  const totalSumAllInPeriod = useMemo(() => {
-    if (!fromD || !toD) return null;
-    return checks
-      .filter((c) => inRange(c.printDate, fromD, toD))
-      .reduce((s, c) => s + Number(c.sumTotal || 0), 0);
-  }, [checks, fromD, toD, dateFrom, dateTo]);
 
   const [unitsSold, setUnitsSold] = useState<number | null>(null);
   const [unitsLoading, setUnitsLoading] = useState(false);
 
   const computeUnitsSold = async () => {
-    if (!upcProduct.trim() || !fromD || !toD) {
+    if (!upcProduct.trim() || !dateFrom || !dateTo) {
       setError('Вкажіть UPC та діапазон дат');
       return;
     }
     setUnitsLoading(true);
     setError('');
     try {
-      const salesRes = await salesApi.getByUpc(upcProduct.trim());
-      const sales = (salesRes.data as SaleLine[]) || [];
-      const checkSet = new Set(
-        checks
-          .filter((c) => inRange(c.printDate, fromD, toD))
-          .map((c) => c.checkNumber)
-      );
-      const n = sales
-        .filter((s) => checkSet.has(s.checkNumber))
-        .reduce((a, s) => a + Number(s.productNumber || 0), 0);
-      setUnitsSold(n);
+      const from = parseDayStart(dateFrom).toISOString();
+      const to = parseDayEnd(dateTo).toISOString();
+      const res = await salesApi.totalSoldByUpcAndPeriod(upcProduct.trim(), { from, to });
+      setUnitsSold(Number(res.data) || 0);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
       setUnitsSold(null);

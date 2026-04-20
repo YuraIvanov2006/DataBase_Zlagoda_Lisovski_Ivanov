@@ -11,4 +11,6 @@ export const salesApi = {
     api.get(`/sales/check/${encodeURIComponent(checkNumber)}/total-sum`),
   totalSoldByUpc: (upc: string) =>
     api.get(`/sales/upc/${encodeURIComponent(upc)}/total-sold`),
+  totalSoldByUpcAndPeriod: (upc: string, params: { from: string; to: string }) =>
+    api.get(`/sales/upc/${encodeURIComponent(upc)}/total-sold-period`, { params }),
 };

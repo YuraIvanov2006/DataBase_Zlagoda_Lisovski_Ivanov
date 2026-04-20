@@ -464,6 +464,7 @@ export function EmployeesPage() {
               Телефон
               <input
                 value={form.emplPhoneNumber}
+                maxLength={13}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, emplPhoneNumber: e.target.value }))
                 }

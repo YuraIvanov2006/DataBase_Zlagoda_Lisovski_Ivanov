@@ -9,4 +9,8 @@ export const checksApi = {
     api.put(`/checks/${encodeURIComponent(checkNumber)}`, body),
   delete: (checkNumber: string) =>
     api.delete(`/checks/${encodeURIComponent(checkNumber)}`),
+  getFiltered: (params: { employeeId?: number; from?: string; to?: string }) =>
+    api.get('/checks/filter', { params }),
+  getSum: (params: { employeeId?: number; from: string; to: string }) =>
+    api.get('/checks/sum', { params }),
 };

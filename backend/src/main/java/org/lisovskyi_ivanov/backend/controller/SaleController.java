@@ -99,4 +99,13 @@ public class SaleController {
         saleService.deleteById(upc, checkNumber);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/upc/{upc}/total-sold-period")
+    public ResponseEntity<Integer> countTotalProductsSoldByUpcAndPeriod(
+            @PathVariable String upc,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime from,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime to) {
+        Integer count = saleService.countTotalProductsSoldByUpcAndPeriod(upc, from, to);
+        return ResponseEntity.ok(count != null ? count : 0);
+    }
 }

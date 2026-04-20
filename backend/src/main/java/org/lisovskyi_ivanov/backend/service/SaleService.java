@@ -171,4 +171,12 @@ public class SaleService {
         }
         repository.deleteAllByCheckNumber(checkNumber);
     }
+
+    @Transactional(readOnly = true)
+    public Integer countTotalProductsSoldByUpcAndPeriod(String upc, java.time.LocalDateTime from, java.time.LocalDateTime to) {
+        if (upc == null || upc.isBlank()) {
+            throw new IllegalArgumentException("UPC must not be null or blank");
+        }
+        return repository.countTotalProductsSoldByUpcAndPeriod(upc, from, to);
+    }
 }

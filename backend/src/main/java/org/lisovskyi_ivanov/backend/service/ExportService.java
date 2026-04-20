@@ -47,8 +47,8 @@ public class ExportService {
 
             PdfPTable table = new PdfPTable(headers.size());
             table.setWidthPercentage(100f);
-            for (String header : headers) {
-                var cell = new PdfPCell(new Phrase(header, headerFont));
+            for (String headerName : headers) {
+                var cell = new PdfPCell(new Phrase(headerName, headerFont));
                 cell.setBackgroundColor(Color.LIGHT_GRAY);
                 table.addCell(cell);
             }

@@ -169,4 +169,24 @@ public class CheckService {
         if (rows == 0)
             throw new NotFoundException(Check.class, "checkNumber", checkNumber);
     }
+
+    @Transactional(readOnly = true)
+    public List<Check> findByEmployeeIdAndPrintDateBetween(Long employeeId, LocalDateTime from, LocalDateTime to) {
+        return repository.findByEmployeeIdAndPrintDateBetween(employeeId, from, to);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Check> findByPrintDateBetween(LocalDateTime from, LocalDateTime to) {
+        return repository.findByPrintDateBetween(from, to);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calculateTotalSumByEmployeeAndPeriod(Long employeeId, LocalDateTime from, LocalDateTime to) {
+        return repository.calculateTotalSumByEmployeeAndPeriod(employeeId, from, to);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calculateTotalSumByPeriod(LocalDateTime from, LocalDateTime to) {
+        return repository.calculateTotalSumByPeriod(from, to);
+    }
 }

@@ -323,6 +323,7 @@ export function ManagerClientCardsPage() {
               Телефон
               <input
                 value={form.custPhoneNumber}
+                maxLength={13}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, custPhoneNumber: e.target.value }))
                 }
