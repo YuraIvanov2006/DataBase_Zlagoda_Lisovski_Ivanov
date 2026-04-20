@@ -1,5 +1,7 @@
 package org.lisovskyi_ivanov.backend.repository.account_repos;
 
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.lisovskyi_ivanov.backend.entity.Account;
 import org.lisovskyi_ivanov.backend.mapping.mapper.AccountRowMapper;
@@ -11,22 +13,18 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 @RequiredArgsConstructor
 public class AccountRepositoryImpl implements AccountRepository {
 
-    private static final String SELECT_ALL =
-            """
-            SELECT a.id_account, a.id_employee, a.login, a.password,
-                   e.empl_surname, e.empl_name, e.empl_patronymic, e.empl_role,
-                   e.salary, e.date_of_birth, e.date_of_start, e.empl_phone_number,
-                   e.empl_city, e.empl_street, e.empl_zip_code
-            FROM accounts a
-            JOIN employees e ON a.id_employee = e.id_employee
-            """;
+    private static final String SELECT_ALL = """
+        SELECT a.id_account, a.id_employee, a.login, a.password,
+               e.empl_surname, e.empl_name, e.empl_patronymic, e.empl_role,
+               e.salary, e.date_of_birth, e.date_of_start, e.empl_phone_number,
+               e.empl_city, e.empl_street, e.empl_zip_code
+        FROM accounts a
+        JOIN employees e ON a.id_employee = e.id_employee
+        """;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
@@ -34,7 +32,10 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public List<Account> findAll() {
-        return jdbc.query(SELECT_ALL + " ORDER BY a.id_account", accountRowMapper);
+        return jdbc.query(
+            SELECT_ALL + " ORDER BY a.id_account",
+            accountRowMapper
+        );
     }
 
     @Override
@@ -51,14 +52,18 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public Account save(Account account) {
-        String sql =
-                """
-                INSERT INTO accounts (id_employee, login, password)
-                VALUES (:id_employee, :login, :password);
-                """;
+        String sql = """
+            INSERT INTO accounts (id_employee, login, password)
+            VALUES (:id_employee, :login, :password);
+            """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedJdbc.update(sql, accountParameters(account), keyHolder, new String[] {"id_account"});
+        namedJdbc.update(
+            sql,
+            accountParameters(account),
+            keyHolder,
+            new String[] { "id_account" }
+        );
 
         Long generatedId = keyHolder.getKeyAs(Long.class);
         return findById(generatedId).orElseThrow();
@@ -66,14 +71,13 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public int update(Account account) {
-        String sql =
-                """
-                UPDATE accounts SET
-                    id_employee = :id_employee,
-                    login = :login,
-                    password = :password
-                WHERE id_account = :id_account;
-                """;
+        String sql = """
+            UPDATE accounts SET
+                id_employee = :id_employee,
+                login = :login,
+                password = :password
+            WHERE id_account = :id_account;
+            """;
 
         return namedJdbc.update(sql, accountParameters(account));
     }
@@ -105,9 +109,14 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     private SqlParameterSource accountParameters(Account account) {
         return new MapSqlParameterSource()
-                .addValue("id_account", account.getIdAccount())
-                .addValue("id_employee", account.getEmployee() != null ? account.getEmployee().getIdEmployee() : null)
-                .addValue("login", account.getLogin())
-                .addValue("password", account.getPassword());
+            .addValue("id_account", account.getIdAccount())
+            .addValue(
+                "id_employee",
+                account.getEmployee() != null
+                    ? account.getEmployee().getIdEmployee()
+                    : null
+            )
+            .addValue("login", account.getLogin())
+            .addValue("password", account.getPassword());
     }
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { storeProductsApi } from '../../api/storeProducts';
+import { productsApi } from '../../api/products';
 import { getApiErrorMessage } from '../../api/index';
 import { DataTable, type DataColumn, type TableSortState } from '../../components/DataTable';
 import { Modal } from '../../components/Modal';
@@ -57,6 +58,8 @@ export function ManagerStoreItemsPage() {
     dir: 'desc',
     type: 'number',
   });
+  const [productsList, setProductsList] = useState<{idProduct: number; productName: string}[]>([]);
+  const [regularStoreProducts, setRegularStoreProducts] = useState<StoreProductRow[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -68,6 +71,9 @@ export function ManagerStoreItemsPage() {
         res = await storeProductsApi.getNotPromotional();
       else res = await storeProductsApi.getAll();
       setRows((res.data as StoreProductRow[]) || []);
+
+      const regRes = await storeProductsApi.getNotPromotional();
+      setRegularStoreProducts((regRes.data as StoreProductRow[]) || []);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
     } finally {
@@ -78,6 +84,12 @@ export function ManagerStoreItemsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    productsApi.getAll()
+      .then((res) => setProductsList(res.data as {idProduct: number; productName: string}[]))
+      .catch((e) => console.error('Failed to load products list', e));
+  }, []);
 
   useEffect(() => {
     if (sortMode === 'quantity') {
@@ -119,10 +131,18 @@ export function ManagerStoreItemsPage() {
 
   const validate = (f: StoreForm, isEdit: boolean) => {
     const err: Record<string, string> = {};
-    if (!isEdit && !f.upc?.trim()) err.upc = "Обов'язково";
+    if (!isEdit) {
+      const u = f.upc?.trim();
+      if (!u) err.upc = "Обов'язково";
+      else if (u.length !== 12) err.upc = "Має бути рівно 12 символів";
+      else if (rows.some((r) => r.upc === u)) err.upc = "Такий UPC вже існує";
+    }
     if (!f.idProduct) err.idProduct = "Обов'язково";
-    const pr = Number(f.sellingPrice);
-    if (Number.isNaN(pr) || pr < 0) err.sellingPrice = '≥ 0';
+    if (f.promotionalProduct && !f.baseProductUpc) err.baseProductUpc = "Обов'язково";
+    if (!f.promotionalProduct) {
+      const pr = Number(f.sellingPrice);
+      if (Number.isNaN(pr) || pr < 0) err.sellingPrice = '≥ 0';
+    }
     const q = Number(f.productsNumber);
     if (Number.isNaN(q) || q < 0) err.productsNumber = '≥ 0';
     return err;
@@ -160,7 +180,7 @@ export function ManagerStoreItemsPage() {
       upc: upcForBody,
       idProduct: Number(form.idProduct),
       baseProductUpc: form.baseProductUpc?.trim() || null,
-      sellingPrice: Number(form.sellingPrice),
+      sellingPrice: form.promotionalProduct ? 0 : Number(form.sellingPrice),
       productsNumber: Number(form.productsNumber),
       promotionalProduct: !!form.promotionalProduct,
     };
@@ -358,8 +378,11 @@ export function ManagerStoreItemsPage() {
                 UPC
                 <input
                   value={form.upc}
+                  maxLength={12}
+                  autoFocus
+                  placeholder="Наприклад: 482001494200"
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, upc: e.target.value }))
+                    setForm((f) => ({ ...f, upc: e.target.value.replace(/\D/g, '') }))
                   }
                 />
                 {formErrors.upc && (
@@ -368,42 +391,43 @@ export function ManagerStoreItemsPage() {
               </label>
             )}
             <label>
-              ID продукту
-              <input
-                type="number"
+              Продукт
+              <select
                 value={form.idProduct}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, idProduct: e.target.value }))
                 }
-              />
+              >
+                <option value="" disabled>
+                  — Оберіть продукт —
+                </option>
+                {productsList.map((p) => (
+                  <option key={p.idProduct} value={String(p.idProduct)}>
+                    {p.idProduct} — {p.productName}
+                  </option>
+                ))}
+              </select>
               {formErrors.idProduct && (
                 <span className="field-error">{formErrors.idProduct}</span>
               )}
             </label>
-            <label>
-              Базовий UPC (опц.)
-              <input
-                value={form.baseProductUpc}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, baseProductUpc: e.target.value }))
-                }
-              />
-            </label>
-            <label>
-              Ціна
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.sellingPrice}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, sellingPrice: e.target.value }))
-                }
-              />
-              {formErrors.sellingPrice && (
-                <span className="field-error">{formErrors.sellingPrice}</span>
-              )}
-            </label>
+            {!form.promotionalProduct && (
+              <label>
+                Ціна
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.sellingPrice}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, sellingPrice: e.target.value }))
+                  }
+                />
+                {formErrors.sellingPrice && (
+                  <span className="field-error">{formErrors.sellingPrice}</span>
+                )}
+              </label>
+            )}
             <label>
               Кількість
               <input
@@ -433,6 +457,29 @@ export function ManagerStoreItemsPage() {
                 }
               />
             </label>
+            {form.promotionalProduct && (
+              <label>
+                Базовий товар (UPC)
+                <select
+                  value={form.baseProductUpc}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, baseProductUpc: e.target.value }))
+                  }
+                >
+                  <option value="" disabled>
+                    — Оберіть звичайний товар —
+                  </option>
+                  {regularStoreProducts.map((p) => (
+                    <option key={p.upc} value={p.upc}>
+                      {p.product?.productName} (UPC: {p.upc})
+                    </option>
+                  ))}
+                </select>
+                {formErrors.baseProductUpc && (
+                  <span className="field-error">{formErrors.baseProductUpc}</span>
+                )}
+              </label>
+            )}
           </div>
           <div className="form-actions">
             <button

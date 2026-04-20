@@ -1,24 +1,40 @@
 import { useState } from 'react';
-import { employeesApi } from '../../api/employees';
-import { customerCardsApi } from '../../api/customerCards';
-import { categoriesApi } from '../../api/categories';
-import { productsApi } from '../../api/products';
-import { storeProductsApi } from '../../api/storeProducts';
-import { checksApi } from '../../api/checks';
 import { getApiErrorMessage } from '../../api/index';
-import { downloadCsv, printHtml } from '../../utils/exportCsv';
-import { formatDateTime, money } from '../../utils/formatters';
+import { downloadReport } from '../../api/export';
 import { Spinner } from '../../components/Spinner';
+
+const REPORT_ENTITIES = [
+  { id: 'employees', label: 'Працівники' },
+  { id: 'customers', label: 'Постійні клієнти' },
+  { id: 'categories', label: 'Категорії товарів' },
+  { id: 'products', label: 'Товари' },
+  { id: 'store-products', label: 'Товар у магазині' },
+  { id: 'checks', label: 'Чеки' },
+];
 
 export function ManagerReportsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const run = async (fn: () => Promise<void>) => {
+  const handleExport = async (entityId: string, format: 'pdf' | 'excel') => {
     setBusy(true);
     setError('');
     try {
-      await fn();
+      if (format === 'pdf') {
+        await downloadReport(
+          `/reports/${entityId}/pdf`,
+          `${entityId}.pdf`,
+          'application/pdf',
+          true
+        );
+      } else {
+        await downloadReport(
+          `/reports/${entityId}/excel`,
+          `${entityId}.xlsx`,
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          false
+        );
+      }
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
     } finally {
@@ -32,169 +48,44 @@ export function ManagerReportsPage() {
       {error && <div className="alert error">{error}</div>}
       {busy && <Spinner label="Формування…" />}
       <p style={{ color: 'var(--muted)', maxWidth: 640 }}>
-        Експорт у CSV або друк HTML. Дані завантажуються з API у момент
-        натискання.
+        Ви можете експортувати дані у формат Excel або попередньо переглянути їх у форматі PDF (для подальшого друку). Звіти містять фірмові колонтитули та відформатовані таблиці без зайвих системних посилань.
       </p>
-      <div className="stack" style={{ gap: '0.75rem', maxWidth: 400 }}>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await employeesApi.getOrderedBySurname();
-              downloadCsv(
-                'employees.csv',
-                ((data as Record<string, unknown>[]) || []).map((e) => ({
-                  id: e.idEmployee,
-                  fullName: e.fullName,
-                  role: e.emplRole,
-                  salary: e.salary,
-                  dateOfStart: e.dateOfStart,
-                  phone: e.emplPhoneNumber,
-                }))
-              );
-            })
-          }
-        >
-          Працівники (CSV)
-        </button>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await customerCardsApi.getAll();
-              downloadCsv(
-                'client-cards.csv',
-                ((data as Record<string, unknown>[]) || []).map((c) => ({
-                  card: c.cardNumber,
-                  surname: c.custSurname,
-                  firstName: c.custName,
-                  patronymic: c.custPatronymic,
-                  phone: c.custPhoneNumber,
-                  discount: c.percent,
-                }))
-              );
-            })
-          }
-        >
-          Клієнти (CSV)
-        </button>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await categoriesApi.getAll();
-              downloadCsv(
-                'categories.csv',
-                ((data as Record<string, unknown>[]) || []).map((c) => ({
-                  id: c.categoryNumber,
-                  name: c.categoryName,
-                }))
-              );
-            })
-          }
-        >
-          Категорії (CSV)
-        </button>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await productsApi.getOrderedByName();
-              downloadCsv(
-                'products.csv',
-                ((data as Record<string, unknown>[]) || []).map((p) => ({
-                  id: p.idProduct,
-                  name: p.productName,
-                  manufacturer: p.manufacturer,
-                  characteristics: p.characteristics,
-                  category: p.categoryName,
-                }))
-              );
-            })
-          }
-        >
-          Товари (CSV)
-        </button>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await storeProductsApi.getAll();
-              downloadCsv(
-                'store-products.csv',
-                ((data as Record<string, unknown>[]) || []).map((s) => {
-                  const product = s.product as
-                    | { productName?: string }
-                    | undefined;
-                  return {
-                    upc: s.upc,
-                    product: product?.productName,
-                    price: s.sellingPrice,
-                    qty: s.productsNumber,
-                    promotional: s.promotionalProduct,
-                  };
-                })
-              );
-            })
-          }
-        >
-          Товар у магазині (CSV)
-        </button>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await checksApi.getAll();
-              const rows = ((data as Record<string, unknown>[]) || [])
-                .map(
-                  (c) =>
-                    `<tr><td>${c.checkNumber}</td><td>${c.employeeName}</td><td>${formatDateTime(String(c.printDate))}</td><td>${money(c.sumTotal)}</td><td>${money(c.vat)}</td></tr>`
-                )
-                .join('');
-              printHtml(
-                'receipts',
-                `<h1>Чеки</h1><table border="1" cellspacing="0" cellpadding="4"><thead><tr><th>№</th><th>Касир</th><th>Дата</th><th>Сума</th><th>ПДВ</th></tr></thead><tbody>${rows}</tbody></table>`
-              );
-            })
-          }
-        >
-          Чеки (друк HTML)
-        </button>
-        <button
-          type="button"
-          className="btn secondary"
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { data } = await checksApi.getAll();
-              downloadCsv(
-                'receipts.csv',
-                ((data as Record<string, unknown>[]) || []).map((c) => ({
-                  check: c.checkNumber,
-                  cashier: c.employeeName,
-                  employeeId: c.employeeId,
-                  date: c.printDate,
-                  sum: c.sumTotal,
-                  vat: c.vat,
-                }))
-              );
-            })
-          }
-        >
-          Чеки (CSV)
-        </button>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: 700, marginTop: '1.5rem' }}>
+        {REPORT_ENTITIES.map((entity) => (
+          <div 
+            key={entity.id} 
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              padding: '1.25rem',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              backgroundColor: 'var(--bg-elevated)'
+            }}
+          >
+            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{entity.label}</h3>
+            <div className="stack" style={{ gap: '0.75rem' }}>
+              <button
+                type="button"
+                className="btn secondary"
+                disabled={busy}
+                onClick={() => handleExport(entity.id, 'pdf')}
+              >
+                📄 Перегляд / Друк (PDF)
+              </button>
+              <button
+                type="button"
+                className="btn primary"
+                disabled={busy}
+                onClick={() => handleExport(entity.id, 'excel')}
+              >
+                📊 Експорт (Excel)
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

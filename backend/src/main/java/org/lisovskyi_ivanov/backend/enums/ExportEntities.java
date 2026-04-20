@@ -11,7 +11,8 @@ public enum ExportEntities {
     CUSTOMERS("customers"),
     PRODUCTS("products"),
     STORE_PRODUCTS("store-products"),
-    CHECKS("checks");
+    CHECKS("checks"),
+    CATEGORIES("categories");
 
     private final String value;
 

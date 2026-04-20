@@ -20,6 +20,7 @@ public class ReportController {
     private final ExportService exportService;
     private final EmployeeService employeeService;
     private final CustomerCardService customerCardService;
+    private final CategoryService categoryService;
     private final ProductService productService;
     private final StoreProductService storeProductService;
     private final CheckService checkService;
@@ -75,6 +76,8 @@ public class ReportController {
             case "customers" -> List.of(
                     "Card Number", "Surname", "Name", "Patronymic",
                     "Phone", "City", "Discount (%)");
+            case "categories" -> List.of(
+                    "Category Number", "Category Name");
             case "products" -> List.of(
                     "ID", "Name", "Category", "Characteristics");
             case "store-products" -> List.of(
@@ -109,6 +112,12 @@ public class ReportController {
                             c.getCustPhoneNumber(),
                             c.getCustCity() != null ? c.getCustCity() : "",
                             String.valueOf(c.getPercent())
+                    )).toList();
+
+            case "categories" -> categoryService.findAll().stream()
+                    .map(c -> List.of(
+                            String.valueOf(c.getCategoryNumber()),
+                            c.getCategoryName()
                     )).toList();
 
             case "products" -> productService.findAll().stream()

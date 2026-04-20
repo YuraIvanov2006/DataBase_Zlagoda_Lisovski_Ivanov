@@ -33,11 +33,20 @@ public class ExportService {
             Font headerFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 14, Font.BOLD);
             Font rowFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 12);
 
+            org.openpdf.text.HeaderFooter header = new org.openpdf.text.HeaderFooter(new Phrase("Автоматизована інформаційна система ZLAGODA", headerFont), false);
+            header.setAlignment(Element.ALIGN_CENTER);
+            doc.setHeader(header);
+
+            org.openpdf.text.HeaderFooter footer = new org.openpdf.text.HeaderFooter(new Phrase("Сторінка "), new Phrase("."));
+            footer.setAlignment(Element.ALIGN_CENTER);
+            doc.setFooter(footer);
+
             doc.open();
             doc.add(new Paragraph(title, titleFont));
             doc.add(new Paragraph(" "));
 
             PdfPTable table = new PdfPTable(headers.size());
+            table.setWidthPercentage(100f);
             for (String header : headers) {
                 var cell = new PdfPCell(new Phrase(header, headerFont));
                 cell.setBackgroundColor(Color.LIGHT_GRAY);
