@@ -9,7 +9,7 @@ import { sortRows, type SortValueType } from '../../utils/sort';
 
 type StoreRow = {
   upc: string;
-  product?: { productName?: string };
+  product?: { productName?: string; characteristics?: string };
   sellingPrice: unknown;
   productsNumber: number;
   promotionalProduct: boolean;
@@ -192,6 +192,8 @@ export function CashierStoreItemsPage() {
       </div>
       {upcHit && (
         <div className="alert info stack">
+          <span>Назва: {upcHit.product?.productName || '—'}</span>
+          <span>Характеристики: {upcHit.product?.characteristics || '—'}</span>
           <span>Ціна: {money(upcHit.sellingPrice)}</span>
           <span>Кількість на складі: {upcHit.productsNumber}</span>
         </div>

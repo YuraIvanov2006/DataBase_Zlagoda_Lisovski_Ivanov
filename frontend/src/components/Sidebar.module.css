@@ -1,50 +1,73 @@
 .aside {
-  width: 248px;
-  background:
-    linear-gradient(170deg, #0f172a 0%, #111827 45%, #172554 100%);
-  color: var(--sidebar-fg);
+  width: 260px;
+  background: var(--bg-darker);
+  color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   z-index: 50;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid var(--border);
 }
 
 .brand {
   font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 1.25rem 1rem;
-  font-size: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.1em;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand::before {
+  content: '✦';
+  font-size: 1.5rem;
+  -webkit-text-fill-color: var(--primary);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  padding: 0.75rem 0.5rem;
-  gap: 0.2rem;
+  padding: 1.5rem 1rem;
+  gap: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .link {
-  padding: 0.65rem 0.8rem;
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.84);
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.92rem;
-  transition: background-color 120ms ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: var(--transition);
 }
 
 .link:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  transform: translateX(4px);
 }
 
 .active {
-  background: rgba(37, 99, 235, 0.28);
-  color: #fff;
+  background: var(--primary-light);
+  color: var(--primary);
   font-weight: 600;
+}
+
+.active:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: none;
 }
 
 .scrim {
@@ -57,8 +80,8 @@
     left: 0;
     top: 0;
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
   }
 
   .aside.open {
@@ -69,9 +92,11 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
     z-index: 40;
     border: none;
     cursor: pointer;
+    animation: fadeIn 0.3s ease-out;
   }
 }

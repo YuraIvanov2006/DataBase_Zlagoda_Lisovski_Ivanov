@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.core.AuthenticationException;
 
 import java.util.Map;
 
@@ -56,13 +58,18 @@ public class AuthController {
     ) {}
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest loginRequest) {
-        authenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.login(), loginRequest.password())
-        );
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.login());
-        String token = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(Map.of("token", token));
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            authenticationProvider.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.login(), loginRequest.password())
+            );
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.login());
+            String token = jwtService.generateToken(userDetails);
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Невірний логін або пароль"));
+        }
     }
 
     @GetMapping("/me")

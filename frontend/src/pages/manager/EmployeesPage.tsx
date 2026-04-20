@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { employeesApi } from '../../api/employees';
+import { register } from '../../api/auth';
 import { getApiErrorMessage } from '../../api/index';
 import { DataTable, type DataColumn, type TableSortState } from '../../components/DataTable';
 import { Modal } from '../../components/Modal';
@@ -35,6 +36,8 @@ const emptyForm = {
   emplCity: '',
   emplStreet: '',
   emplZipCode: '',
+  accountLogin: '',
+  accountPassword: '',
 };
 
 type EmployeeForm = typeof emptyForm;
@@ -111,6 +114,10 @@ export function EmployeesPage() {
       err.emplZipCode = 'До 9 символів';
     const sal = Number(f.salary);
     if (Number.isNaN(sal) || sal < 0) err.salary = '≥ 0';
+    if (modal === 'create') {
+      if (!f.accountLogin?.trim()) err.accountLogin = "Обов'язково";
+      if (!f.accountPassword || f.accountPassword.length < 6) err.accountPassword = "Мінімум 6 символів";
+    }
     return err;
   };
 
@@ -156,6 +163,8 @@ export function EmployeesPage() {
         emplCity: d.emplCity || '',
         emplStreet: d.emplStreet || '',
         emplZipCode: d.emplZipCode || '',
+        accountLogin: '',
+        accountPassword: '',
       });
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
@@ -186,7 +195,15 @@ export function EmployeesPage() {
     };
     try {
       if (modal === 'create') {
-        await employeesApi.create(body);
+        const { data } = await employeesApi.create(body);
+        const createdId = (data as EmployeeRow).idEmployee;
+        if (createdId) {
+          await register({
+            idEmployee: createdId,
+            login: form.accountLogin.trim(),
+            password: form.accountPassword
+          });
+        }
       } else if (modal === 'edit') {
         if (!editingId) throw new Error('Не вдалося визначити ID');
         await employeesApi.update(editingId, body);
@@ -487,6 +504,35 @@ export function EmployeesPage() {
                 <span className="field-error">{formErrors.emplZipCode}</span>
               )}
             </label>
+            {modal === 'create' && (
+              <>
+                <label>
+                  Логін акаунта
+                  <input
+                    value={form.accountLogin}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, accountLogin: e.target.value }))
+                    }
+                  />
+                  {formErrors.accountLogin && (
+                    <span className="field-error">{formErrors.accountLogin}</span>
+                  )}
+                </label>
+                <label>
+                  Пароль акаунта
+                  <input
+                    type="password"
+                    value={form.accountPassword}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, accountPassword: e.target.value }))
+                    }
+                  />
+                  {formErrors.accountPassword && (
+                    <span className="field-error">{formErrors.accountPassword}</span>
+                  )}
+                </label>
+              </>
+            )}
           </div>
           <div className="form-actions">
             <button

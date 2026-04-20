@@ -36,6 +36,7 @@ export function CashierClientCardsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [surnameQ, setSurnameQ] = useState('');
+  const [cardNumberQ, setCardNumberQ] = useState('');
   const [modal, setModal] = useState<'create' | 'edit' | null>(null);
   const [form, setForm] = useState<CardForm>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -65,12 +66,17 @@ export function CashierClientCardsPage() {
   }, [load]);
 
   const filtered = useMemo(() => {
-    if (!surnameQ.trim()) return rows;
-    const q = surnameQ.trim().toLowerCase();
-    return rows.filter((r) =>
-      (r.custSurname || '').toLowerCase().includes(q)
-    );
-  }, [rows, surnameQ]);
+    let res = rows;
+    if (surnameQ.trim()) {
+      const q = surnameQ.trim().toLowerCase();
+      res = res.filter((r) => (r.custSurname || '').toLowerCase().includes(q));
+    }
+    if (cardNumberQ.trim()) {
+      const q = cardNumberQ.trim().toLowerCase();
+      res = res.filter((r) => (r.cardNumber || '').toLowerCase().includes(q));
+    }
+    return res;
+  }, [rows, surnameQ, cardNumberQ]);
 
   const sortedRows = useMemo(
     () =>
@@ -97,6 +103,17 @@ export function CashierClientCardsPage() {
     try {
       const { data } = await customerCardsApi.getBySurname(surnameQ.trim());
       setRows((data as ClientCardRow[]) || []);
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e));
+    }
+  };
+
+  const searchCardApi = async () => {
+    if (!cardNumberQ.trim()) return;
+    setError('');
+    try {
+      const { data } = await customerCardsApi.getByNumber(cardNumberQ.trim());
+      setRows(data ? [data as ClientCardRow] : []);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
     }
@@ -212,10 +229,20 @@ export function CashierClientCardsPage() {
         <SearchBar
           value={surnameQ}
           onChange={setSurnameQ}
-          placeholder="Прізвище (локальний фільтр)"
+          placeholder="Прізвище (локально)"
         />
         <button type="button" className="btn secondary" onClick={searchApi}>
           Пошук API за прізвищем
+        </button>
+      </div>
+      <div className="toolbar">
+        <SearchBar
+          value={cardNumberQ}
+          onChange={setCardNumberQ}
+          placeholder="Номер картки (локально)"
+        />
+        <button type="button" className="btn secondary" onClick={searchCardApi}>
+          Пошук API за номером
         </button>
         <button type="button" className="btn secondary" onClick={load}>
           Усі картки

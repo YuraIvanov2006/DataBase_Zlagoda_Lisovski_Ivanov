@@ -37,8 +37,9 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(provider)
                 .authorizeHttpRequests(auth -> auth
-                        // логін дозволено всім
-                        .requestMatchers(BASE_URL + "/auth/**").permitAll()
+                        // логін дозволено всім, реєстрація тільки менеджеру
+                        .requestMatchers(BASE_URL + "/auth/login").permitAll()
+                        .requestMatchers(BASE_URL + "/auth/register").hasAuthority(Role.MANAGER.getRoleName())
 
                         // ── DELETE (тільки менеджер)
                         .requestMatchers(HttpMethod.DELETE, BASE_URL + "/employees/**").hasAuthority(Role.MANAGER.getRoleName())
