@@ -38,9 +38,11 @@ export function parseFullName(fullName: string): {
 
 export function promotionalUnitPrice(
   sellingPrice: unknown,
-  promotional: boolean
+  _promotional: boolean
 ): number {
+  // Backend already stores discounted price for promotional products.
+  // UI should display the persisted unit price as-is.
   const p = Number(sellingPrice);
   if (Number.isNaN(p)) return 0;
-  return promotional ? p * 0.8 : p;
+  return p;
 }

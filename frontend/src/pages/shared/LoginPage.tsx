@@ -10,15 +10,12 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
   const [localError, setLocalError] = useState('');
 
   const devManagerLogin = import.meta.env.VITE_DEV_MANAGER_LOGIN || '';
   const devManagerPass = import.meta.env.VITE_DEV_MANAGER_PASSWORD || '';
-  const devManagerId = import.meta.env.VITE_DEV_MANAGER_ID || '';
   const devCashierLogin = import.meta.env.VITE_DEV_CASHIER_LOGIN || '';
   const devCashierPass = import.meta.env.VITE_DEV_CASHIER_PASSWORD || '';
-  const devCashierId = import.meta.env.VITE_DEV_CASHIER_ID || '';
 
   if (isAuthenticated) {
     return (
@@ -36,7 +33,6 @@ export function LoginPage() {
       const session = await signIn({
         login: login.trim(),
         password,
-        employeeId: Number(employeeId),
       });
       navigate(
         session.role === 'manager'
@@ -53,12 +49,10 @@ export function LoginPage() {
     if (preset === 'manager' && devManagerLogin) {
       setLogin(devManagerLogin);
       setPassword(devManagerPass);
-      setEmployeeId(devManagerId);
     }
     if (preset === 'cashier' && devCashierLogin) {
       setLogin(devCashierLogin);
       setPassword(devCashierPass);
-      setEmployeeId(devCashierId);
     }
   };
 
@@ -77,16 +71,6 @@ export function LoginPage() {
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               autoComplete="username"
-              required
-            />
-          </label>
-          <label className={styles.label}>
-            ID працівника
-            <input
-              className={styles.input}
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              inputMode="numeric"
               required
             />
           </label>
@@ -130,7 +114,8 @@ export function LoginPage() {
               Задайте у <code>.env.local</code> змінні{' '}
               <code>VITE_DEV_MANAGER_LOGIN</code>,{' '}
               <code>VITE_DEV_MANAGER_PASSWORD</code>,{' '}
-              <code>VITE_DEV_MANAGER_ID</code> (і аналогічно для касира).
+              <code>VITE_DEV_CASHIER_LOGIN</code>,{' '}
+              <code>VITE_DEV_CASHIER_PASSWORD</code>.
             </p>
           </div>
         )}

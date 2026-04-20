@@ -10,8 +10,12 @@ type EmployeeDto = {
   fullName: string;
   emplRole: string;
   salary: unknown;
+  dateOfBirth?: string;
   dateOfStart: string;
   emplPhoneNumber: string;
+  emplCity?: string;
+  emplStreet?: string;
+  emplZipCode?: string;
 };
 
 export function CashierProfilePage() {
@@ -72,7 +76,16 @@ export function CashierProfilePage() {
           <strong>Початок роботи:</strong> {formatDateInput(emp.dateOfStart)}
         </span>
         <span>
+          <strong>Дата народження:</strong> {formatDateInput(emp.dateOfBirth || '')}
+        </span>
+        <span>
           <strong>Телефон:</strong> {emp.emplPhoneNumber}
+        </span>
+        <span>
+          <strong>Адреса:</strong>{' '}
+          {[emp.emplCity, emp.emplStreet, emp.emplZipCode]
+            .filter(Boolean)
+            .join(', ') || '—'}
         </span>
       </div>
     </div>

@@ -9,3 +9,7 @@ export function login({
 }) {
   return api.post('/auth/login', { login: username, password });
 }
+
+export function me() {
+  return api.get('/auth/me');
+}

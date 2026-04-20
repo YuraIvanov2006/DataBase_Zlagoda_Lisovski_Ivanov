@@ -94,7 +94,8 @@ export function CreateReceiptPage() {
 
   const afterDiscount = subtotal - discountAmt;
   const vat = afterDiscount * 0.2;
-  const toPay = afterDiscount + vat;
+  // Backend stores total with VAT included and VAT as informational part.
+  const toPay = afterDiscount;
 
   const projectedStock = useMemo(() => {
     const m = { ...stockMap };
@@ -187,8 +188,8 @@ export function CreateReceiptPage() {
       {error && <div className="alert error">{error}</div>}
       <p className="alert info">
         Одна картка клієнта на чек — знижка застосовується до підсумку рядків.
-        ПДВ 20% від суми після знижки: ПДВ = сума × 0.2, до сплати = сума +
-        ПДВ.
+        ПДВ 20% від підсумку після знижки показується окремо, а сума до сплати
+        відповідає підсумку чека.
       </p>
       <div className="form-grid" style={{ maxWidth: 720 }}>
         <label className="stack" style={{ gridColumn: '1 / -1' }}>
@@ -272,7 +273,7 @@ export function CreateReceiptPage() {
           Знижка ({discountPct}%): −{money(discountAmt)}
         </span>
         <span>Після знижки: {money(afterDiscount)}</span>
-        <span>ПДВ 20%: {money(vat)}</span>
+        <span>ПДВ (інфо) 20%: {money(vat)}</span>
         <strong>До сплати: {money(toPay)}</strong>
       </div>
       <button

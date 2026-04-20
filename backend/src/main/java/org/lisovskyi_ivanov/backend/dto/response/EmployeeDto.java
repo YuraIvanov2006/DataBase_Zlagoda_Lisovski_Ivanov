@@ -8,6 +8,10 @@ public record EmployeeDto(
         String fullName,
         String emplRole,
         BigDecimal salary,
+        LocalDate dateOfBirth,
         LocalDate dateOfStart,
-        String emplPhoneNumber
+        String emplPhoneNumber,
+        String emplCity,
+        String emplStreet,
+        String emplZipCode
 ) {}

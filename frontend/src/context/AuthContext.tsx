@@ -7,7 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import { login as apiLogin } from '../api/auth';
+import { login as apiLogin, me as apiMe } from '../api/auth';
 import { employeesApi } from '../api/employees';
 import { getApiErrorMessage } from '../api/index';
 
@@ -33,7 +33,6 @@ type AuthContextValue = {
   signIn: (args: {
     login: string;
     password: string;
-    employeeId: number;
   }) => Promise<AuthSession>;
   logout: () => void;
   devBootstrap: (empId: number | string, username?: string) => Promise<void>;
@@ -93,7 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const signIn = useCallback(
-    async ({ login: username, password, employeeId: empId }) => {
+    async ({ login: username, password }) => {
       setLoading(true);
       setError('');
       try {
@@ -104,17 +103,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.setItem('token', t);
         setToken(t);
 
-        const id = empId != null ? Number(empId) : NaN;
-        if (!id || Number.isNaN(id)) {
-          throw new Error('Вкажіть коректний ID працівника');
-        }
-
-        const empRes = await employeesApi.getById(id);
-        const emp = empRes.data as {
-          emplRole?: string;
-          fullName?: string;
+        const meRes = await apiMe();
+        const me = meRes.data as {
+          login?: string;
+          employeeId?: number;
+          role?: string;
+          employeeName?: string;
         };
-        const r = (emp.emplRole || '').toLowerCase();
+        const id = Number(me.employeeId);
+        if (!id || Number.isNaN(id)) throw new Error('Невірний профіль користувача');
+
+        const r = (me.role || '').toLowerCase();
         if (r !== 'manager' && r !== 'cashier') {
           throw new Error('Невідома роль у профілі працівника');
         }
@@ -124,8 +123,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           token: t,
           role: userRole,
           employeeId: id,
-          login: username,
-          employeeName: emp.fullName || username,
+          login: me.login || username,
+          employeeName: me.employeeName || username,
         };
         persist(session);
         setRole(userRole);

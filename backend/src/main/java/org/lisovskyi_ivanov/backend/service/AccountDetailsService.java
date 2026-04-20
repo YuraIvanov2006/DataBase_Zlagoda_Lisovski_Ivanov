@@ -3,6 +3,7 @@ package org.lisovskyi_ivanov.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.lisovskyi_ivanov.backend.entity.Account;
+import org.lisovskyi_ivanov.backend.exception.NotFoundException;
 import org.lisovskyi_ivanov.backend.repository.account_repos.AccountRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,6 +23,14 @@ public class AccountDetailsService implements UserDetailsService {
 
     public boolean existsByLogin(String login) {
         return repository.findByLogin(login).isPresent();
+    }
+
+    public Account findByLogin(String login) {
+        if (login == null || login.isBlank()) {
+            throw new IllegalArgumentException("Login must not be null or blank");
+        }
+        return repository.findByLogin(login)
+                .orElseThrow(() -> new NotFoundException(Account.class, "login", login));
     }
 
     public Account save(Account account) {

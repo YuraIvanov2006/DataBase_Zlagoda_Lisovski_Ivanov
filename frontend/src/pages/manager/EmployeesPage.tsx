@@ -15,8 +15,12 @@ type EmployeeRow = {
   fullName: string;
   emplRole: string;
   salary: unknown;
+  dateOfBirth?: string;
   dateOfStart: string;
   emplPhoneNumber: string;
+  emplCity?: string;
+  emplStreet?: string;
+  emplZipCode?: string;
 };
 
 const emptyForm = {
@@ -128,8 +132,12 @@ export function EmployeesPage() {
         fullName?: string;
         emplRole?: string;
         salary?: unknown;
+        dateOfBirth?: string;
         dateOfStart?: string;
         emplPhoneNumber?: string;
+        emplCity?: string;
+        emplStreet?: string;
+        emplZipCode?: string;
       };
       const { surname, firstName, patronymic } = parseFullName(
         d.fullName || ''
@@ -142,12 +150,12 @@ export function EmployeesPage() {
           ? 'MANAGER'
           : 'CASHIER',
         salary: d.salary ?? '',
-        dateOfBirth: '',
+        dateOfBirth: formatDateInput(d.dateOfBirth || ''),
         dateOfStart: formatDateInput(d.dateOfStart || ''),
         emplPhoneNumber: d.emplPhoneNumber || '',
-        emplCity: '',
-        emplStreet: '',
-        emplZipCode: '',
+        emplCity: d.emplCity || '',
+        emplStreet: d.emplStreet || '',
+        emplZipCode: d.emplZipCode || '',
       });
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
@@ -311,7 +319,9 @@ export function EmployeesPage() {
           <span>ПІБ: {searchHit.fullName}</span>
           <span>Телефон: {searchHit.emplPhoneNumber}</span>
           <span>
-            Адреса: у відповіді API немає полів міста/вулиці (див. EmployeeDto)
+            Адреса: {[searchHit.emplCity, searchHit.emplStreet, searchHit.emplZipCode]
+              .filter(Boolean)
+              .join(', ') || '—'}
           </span>
         </div>
       )}

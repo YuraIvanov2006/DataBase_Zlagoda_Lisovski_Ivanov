@@ -1,10 +1,10 @@
 :root {
-  --bg: #f4f6f9;
+  --bg: #f3f6fb;
   --surface: #ffffff;
-  --surface-2: #f0f2f7;
+  --surface-2: #eef2f9;
   --text: #0f172a;
   --muted: #64748b;
-  --border: #e2e8f0;
+  --border: #dbe4f0;
   --accent: #2563eb;
   --accent-2: #38bdf8;
   --danger: #dc2626;
@@ -29,6 +29,7 @@
 body {
   margin: 0;
   min-height: 100vh;
+  background: var(--bg);
 }
 
 #root {
@@ -64,7 +65,7 @@ h1 {
 
 .alert {
   padding: 0.65rem 0.85rem;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -87,7 +88,7 @@ h1 {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.45rem 0.9rem;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
@@ -95,11 +96,20 @@ h1 {
   text-decoration: none;
   background: var(--surface);
   color: var(--text);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
 }
 
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 .btn.primary {
@@ -143,8 +153,9 @@ h1 {
 .form-grid textarea {
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 0.95rem;
+  background: var(--surface);
 }
 
 .form-actions {
