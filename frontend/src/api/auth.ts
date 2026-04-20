@@ -13,3 +13,15 @@ export function login({
 export function me() {
   return api.get('/auth/me');
 }
+
+export function register({
+  idEmployee,
+  login: username,
+  password,
+}: {
+  idEmployee: number;
+  login: string;
+  password: string;
+}) {
+  return api.post('/auth/register', { idEmployee, login: username, password });
+}
