@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { employeesApi } from '../../api/employees';
-import { register } from '../../api/auth';
-import { getApiErrorMessage } from '../../api/index';
-import { DataTable, type DataColumn, type TableSortState } from '../../components/DataTable';
-import { Modal } from '../../components/Modal';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { SearchBar } from '../../components/SearchBar';
-import { Spinner } from '../../components/Spinner';
-import { formatDateInput, money, parseFullName } from '../../utils/formatters';
-import { sortRows, type SortValueType } from '../../utils/sort';
-import { isAdultBirthDate, validatePhone } from '../../utils/validators';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { employeesApi } from "../../api/employees";
+import { register } from "../../api/auth";
+import { getApiErrorMessage } from "../../api/index";
+import {
+  DataTable,
+  type DataColumn,
+  type TableSortState,
+} from "../../components/DataTable";
+import { Modal } from "../../components/Modal";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { SearchBar } from "../../components/SearchBar";
+import { Spinner } from "../../components/Spinner";
+import { formatDateInput, money, parseFullName } from "../../utils/formatters";
+import { sortRows, type SortValueType } from "../../utils/sort";
+import { isAdultBirthDate, validatePhone } from "../../utils/validators";
 
 type EmployeeRow = {
   idEmployee: number;
@@ -25,19 +29,19 @@ type EmployeeRow = {
 };
 
 const emptyForm = {
-  emplSurname: '',
-  emplName: '',
-  emplPatronymic: '',
-  emplRole: 'CASHIER',
-  salary: '',
-  dateOfBirth: '',
-  dateOfStart: '',
-  emplPhoneNumber: '',
-  emplCity: '',
-  emplStreet: '',
-  emplZipCode: '',
-  accountLogin: '',
-  accountPassword: '',
+  emplSurname: "",
+  emplName: "",
+  emplPatronymic: "",
+  emplRole: "CASHIER",
+  salary: "",
+  dateOfBirth: "",
+  dateOfStart: "",
+  emplPhoneNumber: "",
+  emplCity: "",
+  emplStreet: "",
+  emplZipCode: "",
+  accountLogin: "",
+  accountPassword: "",
 };
 
 type EmployeeForm = typeof emptyForm;
@@ -45,25 +49,25 @@ type EmployeeForm = typeof emptyForm;
 export function EmployeesPage() {
   const [rows, setRows] = useState<EmployeeRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [cashiersOnly, setCashiersOnly] = useState(false);
-  const [searchSurname, setSearchSurname] = useState('');
+  const [searchSurname, setSearchSurname] = useState("");
   const [searchHit, setSearchHit] = useState<EmployeeRow | null>(null);
-  const [modal, setModal] = useState<'create' | 'edit' | null>(null);
+  const [modal, setModal] = useState<"create" | "edit" | null>(null);
   const [form, setForm] = useState<EmployeeForm>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<EmployeeRow | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [sortState, setSortState] = useState<TableSortState>({
-    key: 'fullName',
-    dir: 'asc',
-    type: 'string',
+    key: "fullName",
+    dir: "asc",
+    type: "string",
   });
 
   const load = useCallback(async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const res = cashiersOnly
         ? await employeesApi.getCashiers()
@@ -85,15 +89,15 @@ export function EmployeesPage() {
       rows,
       sortState.key,
       sortState.dir,
-      (sortState.type || 'string') as SortValueType
+      (sortState.type || "string") as SortValueType,
     );
   }, [rows, sortState]);
 
   const onSort = (key: string, type?: SortValueType) => {
     setSortState((s) => ({
       key,
-      type: type || 'string',
-      dir: s.key === key && s.dir === 'asc' ? 'desc' : 'asc',
+      type: type || "string",
+      dir: s.key === key && s.dir === "asc" ? "desc" : "asc",
     }));
   };
 
@@ -103,7 +107,7 @@ export function EmployeesPage() {
     if (!f.emplName?.trim()) err.emplName = "Обов'язково";
     if (!f.dateOfBirth) err.dateOfBirth = "Обов'язково";
     else if (!isAdultBirthDate(f.dateOfBirth))
-      err.dateOfBirth = 'Вік має бути не менше 18 років';
+      err.dateOfBirth = "Вік має бути не менше 18 років";
     if (!f.dateOfStart) err.dateOfStart = "Обов'язково";
     const pe = validatePhone(f.emplPhoneNumber);
     if (pe) err.emplPhoneNumber = pe;
@@ -111,12 +115,13 @@ export function EmployeesPage() {
     if (!f.emplStreet?.trim()) err.emplStreet = "Обов'язково";
     if (!f.emplZipCode?.trim()) err.emplZipCode = "Обов'язково";
     if (f.emplZipCode?.length && f.emplZipCode.length > 9)
-      err.emplZipCode = 'До 9 символів';
+      err.emplZipCode = "До 9 символів";
     const sal = Number(f.salary);
-    if (Number.isNaN(sal) || sal < 0) err.salary = '≥ 0';
-    if (modal === 'create') {
+    if (Number.isNaN(sal) || sal < 0) err.salary = "≥ 0";
+    if (modal === "create") {
       if (!f.accountLogin?.trim()) err.accountLogin = "Обов'язково";
-      if (!f.accountPassword || f.accountPassword.length < 6) err.accountPassword = "Мінімум 6 символів";
+      if (!f.accountPassword || f.accountPassword.length < 6)
+        err.accountPassword = "Мінімум 6 символів";
     }
     return err;
   };
@@ -125,13 +130,13 @@ export function EmployeesPage() {
     setEditingId(null);
     setForm(emptyForm);
     setFormErrors({});
-    setModal('create');
+    setModal("create");
   };
 
   const openEdit = async (row: EmployeeRow) => {
     setEditingId(row.idEmployee);
     setFormErrors({});
-    setModal('edit');
+    setModal("edit");
     setSaving(true);
     try {
       const { data } = await employeesApi.getById(row.idEmployee);
@@ -147,24 +152,24 @@ export function EmployeesPage() {
         emplZipCode?: string;
       };
       const { surname, firstName, patronymic } = parseFullName(
-        d.fullName || ''
+        d.fullName || "",
       );
       setForm({
         emplSurname: surname,
         emplName: firstName,
         emplPatronymic: patronymic,
-        emplRole: (d.emplRole || 'CASHIER').toUpperCase().includes('MANAG')
-          ? 'MANAGER'
-          : 'CASHIER',
-        salary: d.salary ?? '',
-        dateOfBirth: formatDateInput(d.dateOfBirth || ''),
-        dateOfStart: formatDateInput(d.dateOfStart || ''),
-        emplPhoneNumber: d.emplPhoneNumber || '',
-        emplCity: d.emplCity || '',
-        emplStreet: d.emplStreet || '',
-        emplZipCode: d.emplZipCode || '',
-        accountLogin: '',
-        accountPassword: '',
+        emplRole: (d.emplRole || "CASHIER").toUpperCase().includes("MANAG")
+          ? "MANAGER"
+          : "CASHIER",
+        salary: d.salary ?? "",
+        dateOfBirth: formatDateInput(d.dateOfBirth || ""),
+        dateOfStart: formatDateInput(d.dateOfStart || ""),
+        emplPhoneNumber: d.emplPhoneNumber || "",
+        emplCity: d.emplCity || "",
+        emplStreet: d.emplStreet || "",
+        emplZipCode: d.emplZipCode || "",
+        accountLogin: "",
+        accountPassword: "",
       });
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
@@ -179,7 +184,7 @@ export function EmployeesPage() {
     setFormErrors(err);
     if (Object.keys(err).length) return;
     setSaving(true);
-    setError('');
+    setError("");
     const body = {
       emplSurname: form.emplSurname.trim(),
       emplName: form.emplName.trim(),
@@ -194,18 +199,18 @@ export function EmployeesPage() {
       emplZipCode: form.emplZipCode.trim(),
     };
     try {
-      if (modal === 'create') {
+      if (modal === "create") {
         const { data } = await employeesApi.create(body);
         const createdId = (data as EmployeeRow).idEmployee;
         if (createdId) {
           await register({
             idEmployee: createdId,
             login: form.accountLogin.trim(),
-            password: form.accountPassword
+            password: form.accountPassword,
           });
         }
-      } else if (modal === 'edit') {
-        if (!editingId) throw new Error('Не вдалося визначити ID');
+      } else if (modal === "edit") {
+        if (!editingId) throw new Error("Не вдалося визначити ID");
         await employeesApi.update(editingId, body);
       }
       setModal(null);
@@ -234,7 +239,7 @@ export function EmployeesPage() {
 
   const runSearch = async () => {
     if (!searchSurname.trim()) return;
-    setError('');
+    setError("");
     try {
       const { data } = await employeesApi.searchBySurname(searchSurname.trim());
       setSearchHit((data as EmployeeRow) || null);
@@ -246,39 +251,39 @@ export function EmployeesPage() {
 
   const columns: DataColumn<EmployeeRow>[] = [
     {
-      key: 'fullName',
-      label: 'ПІБ',
+      key: "fullName",
+      label: "ПІБ",
       sortable: true,
       render: (r) => r.fullName,
     },
     {
-      key: 'emplRole',
-      label: 'Роль',
+      key: "emplRole",
+      label: "Роль",
       sortable: true,
       render: (r) => r.emplRole,
     },
     {
-      key: 'salary',
-      label: 'Зарплата',
+      key: "salary",
+      label: "Зарплата",
       sortable: true,
-      sortType: 'number',
+      sortType: "number",
       render: (r) => money(r.salary),
     },
     {
-      key: 'dateOfStart',
-      label: 'Початок',
+      key: "dateOfStart",
+      label: "Початок",
       sortable: true,
       render: (r) => formatDateInput(r.dateOfStart),
     },
     {
-      key: 'emplPhoneNumber',
-      label: 'Телефон',
+      key: "emplPhoneNumber",
+      label: "Телефон",
       sortable: true,
       render: (r) => r.emplPhoneNumber,
     },
     {
-      key: '_actions',
-      label: '',
+      key: "_actions",
+      label: "",
       render: (r) => (
         <div className="stack">
           <button
@@ -314,7 +319,7 @@ export function EmployeesPage() {
       <div className="toolbar">
         <label
           className="stack"
-          style={{ fontSize: '0.85rem', color: 'var(--muted)' }}
+          style={{ fontSize: "0.85rem", color: "var(--muted)" }}
         >
           <input
             type="checkbox"
@@ -336,9 +341,10 @@ export function EmployeesPage() {
           <span>ПІБ: {searchHit.fullName}</span>
           <span>Телефон: {searchHit.emplPhoneNumber}</span>
           <span>
-            Адреса: {[searchHit.emplCity, searchHit.emplStreet, searchHit.emplZipCode]
+            Адреса:{" "}
+            {[searchHit.emplCity, searchHit.emplStreet, searchHit.emplZipCode]
               .filter(Boolean)
-              .join(', ') || '—'}
+              .join(", ") || "—"}
           </span>
         </div>
       )}
@@ -352,7 +358,7 @@ export function EmployeesPage() {
       {saving && <Spinner label="Збереження…" />}
       {modal && (
         <Modal
-          title={modal === 'create' ? 'Новий працівник' : 'Редагування'}
+          title={modal === "create" ? "Новий працівник" : "Редагування"}
           onClose={() => {
             if (!saving) {
               setModal(null);
@@ -361,7 +367,7 @@ export function EmployeesPage() {
           }}
           wide
         >
-          {modal === 'edit' && (
+          {modal === "edit" && (
             <p className="alert info" style={{ marginTop: 0 }}>
               API повертає не всі поля профілю. Заповніть дату народження та
               адресу перед збереженням.
@@ -504,7 +510,7 @@ export function EmployeesPage() {
                 <span className="field-error">{formErrors.emplZipCode}</span>
               )}
             </label>
-            {modal === 'create' && (
+            {modal === "create" && (
               <>
                 <label>
                   Логін акаунта
@@ -515,7 +521,9 @@ export function EmployeesPage() {
                     }
                   />
                   {formErrors.accountLogin && (
-                    <span className="field-error">{formErrors.accountLogin}</span>
+                    <span className="field-error">
+                      {formErrors.accountLogin}
+                    </span>
                   )}
                 </label>
                 <label>
@@ -524,11 +532,16 @@ export function EmployeesPage() {
                     type="password"
                     value={form.accountPassword}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, accountPassword: e.target.value }))
+                      setForm((f) => ({
+                        ...f,
+                        accountPassword: e.target.value,
+                      }))
                     }
                   />
                   {formErrors.accountPassword && (
-                    <span className="field-error">{formErrors.accountPassword}</span>
+                    <span className="field-error">
+                      {formErrors.accountPassword}
+                    </span>
                   )}
                 </label>
               </>

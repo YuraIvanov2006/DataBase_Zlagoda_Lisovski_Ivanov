@@ -1,4 +1,4 @@
-import { api } from './index';
+import { api } from "./index";
 
 export function login({
   login: username,
@@ -7,13 +7,14 @@ export function login({
   login: string;
   password: string;
 }) {
-  return api.post('/auth/login', { login: username, password });
+  return api.post("/auth/login", { login: username, password });
 }
 
 export function me() {
-  return api.get('/auth/me');
+  return api.get("/auth/me");
 }
 
+// Використовується менеджером при створенні працівника
 export function register({
   idEmployee,
   login: username,
@@ -23,5 +24,5 @@ export function register({
   login: string;
   password: string;
 }) {
-  return api.post('/auth/register', { idEmployee, login: username, password });
+  return api.post("/auth/register", { idEmployee, login: username, password });
 }
