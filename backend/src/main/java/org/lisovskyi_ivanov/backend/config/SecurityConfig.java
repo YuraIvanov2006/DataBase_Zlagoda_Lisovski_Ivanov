@@ -40,7 +40,7 @@ public class SecurityConfig {
             .authenticationProvider(provider)
             .authorizeHttpRequests(auth ->
                 auth
-                    // ✅ Всі auth ендпоінти відкриті без токена
+                    // Всі auth ендпоінти відкриті без токена
                     .requestMatchers(
                         "/auth/login",
                         "/auth/register",

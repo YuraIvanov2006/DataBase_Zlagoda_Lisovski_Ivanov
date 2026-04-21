@@ -10,6 +10,7 @@ import { ManagerCategoriesPage } from '../pages/manager/ManagerCategoriesPage';
 import { ManagerClientCardsPage } from '../pages/manager/ManagerClientCardsPage';
 import { ManagerReceiptsPage } from '../pages/manager/ManagerReceiptsPage';
 import { ManagerReportsPage } from '../pages/manager/ManagerReportsPage';
+import { ManagerComplexQueriesPage } from '../pages/manager/ManagerComplexQueriesPage';
 import { CashierProductsPage } from '../pages/cashier/CashierProductsPage';
 import { CashierStoreItemsPage } from '../pages/cashier/CashierStoreItemsPage';
 import { CashierClientCardsPage } from '../pages/cashier/CashierClientCardsPage';
@@ -84,6 +85,14 @@ export function AppRouter() {
             element={
               <ProtectedRoute roles={['manager']}>
                 <ManagerReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="manager/complex-queries"
+            element={
+              <ProtectedRoute roles={['manager']}>
+                <ManagerComplexQueriesPage />
               </ProtectedRoute>
             }
           />

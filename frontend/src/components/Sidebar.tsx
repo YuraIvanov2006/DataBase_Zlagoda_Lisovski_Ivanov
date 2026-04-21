@@ -10,6 +10,7 @@ const managerLinks = [
   { to: '/manager/client-cards', label: 'Картки клієнтів' },
   { to: '/manager/receipts', label: 'Чеки' },
   { to: '/manager/reports', label: 'Звіти' },
+  { to: '/manager/complex-queries', label: 'Складні запити' },
 ];
 
 const cashierLinks = [
