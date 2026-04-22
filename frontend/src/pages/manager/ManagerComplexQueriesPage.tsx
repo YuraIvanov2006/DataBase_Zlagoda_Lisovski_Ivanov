@@ -92,11 +92,11 @@ export function ManagerComplexQueriesPage() {
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '2rem' }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label>Дата початку</label>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+              <input type="date" value={startDate} max={endDate || undefined} onChange={e => setStartDate(e.target.value)} />
             </div>
             <div className="form-group" style={{ margin: 0 }}>
               <label>Дата завершення</label>
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+              <input type="date" value={endDate} min={startDate || undefined} onChange={e => setEndDate(e.target.value)} />
             </div>
             <button className="btn primary" onClick={fetchCategorySales} disabled={busy}>
               {busy ? <Spinner /> : 'Виконати запит'}

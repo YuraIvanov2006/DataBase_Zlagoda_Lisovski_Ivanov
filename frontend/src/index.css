@@ -8,9 +8,9 @@
   --surface: #1e293b;
   --surface-2: rgba(255, 255, 255, 0.03);
   --surface-hover: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #ffffff;
+  --text-secondary: #f8fafc;
+  --text-muted: #f1f5f9;
   
   --primary: #3b82f6;
   --primary-hover: #2563eb;
@@ -195,27 +195,27 @@ a:hover {
 }
 
 .form-input, .form-select, .form-textarea,
-.form-grid input, .form-grid select, .form-grid textarea {
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   width: 100%;
   padding: 0.75rem 1rem;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
+  color: #ffffff !important;
   font-family: inherit;
   font-size: 0.875rem;
   transition: var(--transition);
 }
 
 .form-input:focus, .form-select:focus, .form-textarea:focus,
-.form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus {
+input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-light);
   background: rgba(15, 23, 42, 0.9);
 }
 
-.form-input::placeholder, .form-grid input::placeholder {
+.form-input::placeholder, input::placeholder, textarea::placeholder {
   color: var(--text-muted);
 }
 

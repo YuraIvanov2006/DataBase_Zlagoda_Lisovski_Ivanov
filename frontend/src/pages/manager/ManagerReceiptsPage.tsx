@@ -15,17 +15,17 @@ type CheckRow = {
   employeeId: number;
   employeeName: string;
   printDate: string;
-  sumTotal: unknown;
-  vat: unknown;
+  sumTotal: number;
+  vat: number;
 };
 
 type SaleLine = {
   upc: string;
   checkNumber: string;
   productName?: string;
-  productNumber: unknown;
-  sellingPrice: unknown;
-  totalRowPrice: unknown;
+  productNumber: number;
+  sellingPrice: number;
+  totalRowPrice: number;
 };
 
 type CashierOpt = { idEmployee: number; fullName: string };
@@ -36,11 +36,6 @@ function parseDayStart(isoDate: string) {
 
 function parseDayEnd(isoDate: string) {
   return new Date(isoDate + 'T23:59:59.999');
-}
-
-function inRange(isoDateTime: string, from: Date, to: Date) {
-  const t = new Date(isoDateTime).getTime();
-  return t >= from.getTime() && t <= to.getTime();
 }
 
 export function ManagerReceiptsPage() {
@@ -123,9 +118,6 @@ export function ManagerReceiptsPage() {
       .then(res => setStoreItems(res.data as any[]))
       .catch(e => console.error(e));
   }, []);
-
-  const fromD = dateFrom ? parseDayStart(dateFrom) : null;
-  const toD = dateTo ? parseDayEnd(dateTo) : null;
 
   const sortedRows = useMemo(
     () =>
@@ -287,6 +279,7 @@ export function ManagerReceiptsPage() {
           <input
             type="date"
             value={dateFrom}
+            max={dateTo || undefined}
             onChange={(e) => setDateFrom(e.target.value)}
           />
         </label>
@@ -298,6 +291,7 @@ export function ManagerReceiptsPage() {
           <input
             type="date"
             value={dateTo}
+            min={dateFrom || undefined}
             onChange={(e) => setDateTo(e.target.value)}
           />
         </label>

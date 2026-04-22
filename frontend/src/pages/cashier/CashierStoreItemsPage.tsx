@@ -10,7 +10,7 @@ import { sortRows, type SortValueType } from '../../utils/sort';
 type StoreRow = {
   upc: string;
   product?: { productName?: string; characteristics?: string };
-  sellingPrice: unknown;
+  sellingPrice: number;
   productsNumber: number;
   promotionalProduct: boolean;
   productName?: string;

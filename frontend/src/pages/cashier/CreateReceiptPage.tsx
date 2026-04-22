@@ -17,7 +17,7 @@ type ClientCard = {
 
 type StoreItem = {
   upc: string;
-  sellingPrice: unknown;
+  sellingPrice: number;
   promotionalProduct: boolean;
   productsNumber: number;
   product?: { productName?: string };
@@ -172,7 +172,7 @@ export function CreateReceiptPage() {
       setLines([]);
       setCardNumber('');
       await refreshData();
-      alert(`Чек ${checkNumber} створено (якщо бекенд прийняв запит).`);
+      alert(`Чек ${checkNumber} успішно створено.`);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e));
     } finally {

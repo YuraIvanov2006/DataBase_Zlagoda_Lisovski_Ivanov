@@ -18,7 +18,7 @@ type StoreProductRow = {
     idProduct?: number;
   };
   baseProductUpc?: string | null;
-  sellingPrice: unknown;
+  sellingPrice: number;
   productsNumber: number;
   promotionalProduct: boolean;
   productName?: string;
@@ -161,8 +161,8 @@ export function ManagerStoreItemsPage() {
       upc: row.upc,
       idProduct: String(row.product?.idProduct ?? ''),
       baseProductUpc: row.baseProductUpc || '',
-      sellingPrice: row.sellingPrice ?? '',
-      productsNumber: row.productsNumber ?? '',
+      sellingPrice: String(row.sellingPrice ?? ''),
+      productsNumber: String(row.productsNumber ?? ''),
       promotionalProduct: !!row.promotionalProduct,
     });
     setFormErrors({});

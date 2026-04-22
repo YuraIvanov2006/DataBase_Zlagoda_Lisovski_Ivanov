@@ -92,7 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const signIn = useCallback(
-    async ({ login: username, password }) => {
+    async ({ login: username, password }: { login: string; password: string }) => {
       setLoading(true);
       setError('');
       try {

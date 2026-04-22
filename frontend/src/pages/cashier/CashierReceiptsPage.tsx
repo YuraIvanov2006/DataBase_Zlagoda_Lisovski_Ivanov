@@ -13,17 +13,17 @@ type CheckRow = {
   checkNumber: string;
   employeeId: number;
   printDate: string;
-  sumTotal: unknown;
-  vat: unknown;
+  sumTotal: number;
+  vat: number;
 };
 
 type SaleLine = {
   upc: string;
   checkNumber: string;
   productName?: string;
-  productNumber: unknown;
-  sellingPrice: unknown;
-  totalRowPrice: unknown;
+  productNumber: number;
+  sellingPrice: number;
+  totalRowPrice: number;
 };
 
 function parseDayStart(isoDate: string) {
@@ -34,20 +34,7 @@ function parseDayEnd(isoDate: string) {
   return new Date(isoDate + 'T23:59:59.999');
 }
 
-function inRange(isoDateTime: string, from: Date, to: Date) {
-  const t = new Date(isoDateTime).getTime();
-  return t >= from.getTime() && t <= to.getTime();
-}
 
-function isToday(isoDateTime: string) {
-  const d = new Date(isoDateTime);
-  const n = new Date();
-  return (
-    d.getFullYear() === n.getFullYear() &&
-    d.getMonth() === n.getMonth() &&
-    d.getDate() === n.getDate()
-  );
-}
 
 export function CashierReceiptsPage() {
   const { employeeId } = useAuth();
@@ -182,11 +169,13 @@ export function CashierReceiptsPage() {
             <input
               type="date"
               value={dateFrom}
+              max={dateTo || undefined}
               onChange={(e) => setDateFrom(e.target.value)}
             />
             <input
               type="date"
               value={dateTo}
+              min={dateFrom || undefined}
               onChange={(e) => setDateTo(e.target.value)}
             />
           </>

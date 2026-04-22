@@ -19,7 +19,7 @@ type EmployeeRow = {
   idEmployee: number;
   fullName: string;
   emplRole: string;
-  salary: unknown;
+  salary: number;
   dateOfBirth?: string;
   dateOfStart: string;
   emplPhoneNumber: string;
@@ -161,7 +161,7 @@ export function EmployeesPage() {
         emplRole: (d.emplRole || "CASHIER").toUpperCase().includes("MANAG")
           ? "MANAGER"
           : "CASHIER",
-        salary: d.salary ?? "",
+        salary: String(d.salary ?? ""),
         dateOfBirth: formatDateInput(d.dateOfBirth || ""),
         dateOfStart: formatDateInput(d.dateOfStart || ""),
         emplPhoneNumber: d.emplPhoneNumber || "",
@@ -318,8 +318,7 @@ export function EmployeesPage() {
       {error && <div className="alert error">{error}</div>}
       <div className="toolbar">
         <label
-          className="stack"
-          style={{ fontSize: "0.85rem", color: "var(--muted)" }}
+          style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.85rem", color: "var(--muted)", cursor: "pointer" }}
         >
           <input
             type="checkbox"
@@ -336,16 +335,28 @@ export function EmployeesPage() {
         />
       </div>
       {searchHit && (
-        <div className="alert info stack">
-          <strong>Результат пошуку</strong>
-          <span>ПІБ: {searchHit.fullName}</span>
-          <span>Телефон: {searchHit.emplPhoneNumber}</span>
-          <span>
-            Адреса:{" "}
-            {[searchHit.emplCity, searchHit.emplStreet, searchHit.emplZipCode]
-              .filter(Boolean)
-              .join(", ") || "—"}
-          </span>
+        <div className="alert info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#fff', border: '1px solid var(--primary)' }}>
+          <div className="stack">
+            <strong style={{ fontSize: '1.1em', color: '#fff' }}>Результат пошуку</strong>
+            <span>ПІБ: {searchHit.fullName}</span>
+            <span>Телефон: {searchHit.emplPhoneNumber}</span>
+            <span>
+              Адреса:{" "}
+              {[searchHit.emplCity, searchHit.emplStreet, searchHit.emplZipCode]
+                .filter(Boolean)
+                .join(", ") || "—"}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn secondary small"
+            onClick={() => {
+              setSearchHit(null);
+              setSearchSurname("");
+            }}
+          >
+            Очистити
+          </button>
         </div>
       )}
       <DataTable
@@ -367,12 +378,7 @@ export function EmployeesPage() {
           }}
           wide
         >
-          {modal === "edit" && (
-            <p className="alert info" style={{ marginTop: 0 }}>
-              API повертає не всі поля профілю. Заповніть дату народження та
-              адресу перед збереженням.
-            </p>
-          )}
+
           <div className="form-grid">
             <label>
               Прізвище

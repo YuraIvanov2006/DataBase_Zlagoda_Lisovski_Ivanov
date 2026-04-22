@@ -249,10 +249,7 @@ export function ManagerClientCardsPage() {
           </select>
         </label>
       </div>
-      <p className="alert info" style={{ fontSize: '0.85rem' }}>
-        У відповіді API для картки немає адреси — поля міста/вулиці при
-        редагуванні можна залишити порожніми, якщо бекенд це дозволяє.
-      </p>
+
       <DataTable
         columns={columns}
         rows={sortedRows}
