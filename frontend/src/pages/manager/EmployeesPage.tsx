@@ -11,7 +11,7 @@ import { Modal } from "../../components/Modal";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { SearchBar } from "../../components/SearchBar";
 import { Spinner } from "../../components/Spinner";
-import { formatDateInput, money, parseFullName } from "../../utils/formatters";
+import { formatDateInput, formatPhoneInput, money, parseFullName } from "../../utils/formatters";
 import { sortRows, type SortValueType } from "../../utils/sort";
 import { isAdultBirthDate, validatePhone } from "../../utils/validators";
 
@@ -463,10 +463,11 @@ export function EmployeesPage() {
             <label>
               Телефон
               <input
+                type="tel"
                 value={form.emplPhoneNumber}
                 maxLength={13}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, emplPhoneNumber: e.target.value }))
+                  setForm((f) => ({ ...f, emplPhoneNumber: formatPhoneInput(e.target.value) }))
                 }
               />
               {formErrors.emplPhoneNumber && (

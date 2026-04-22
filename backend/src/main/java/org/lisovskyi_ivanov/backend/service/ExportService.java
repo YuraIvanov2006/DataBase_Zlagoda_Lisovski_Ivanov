@@ -5,6 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.lisovskyi_ivanov.backend.exception.ExportException;
 import org.openpdf.text.*;
 import org.openpdf.text.Font;
+import org.openpdf.text.pdf.BaseFont;
 import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
@@ -29,9 +30,16 @@ public class ExportService {
         try {
             PdfWriter.getInstance(doc, baos);
 
-            Font titleFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 18, Font.BOLD);
-            Font headerFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 14, Font.BOLD);
-            Font rowFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 12);
+            BaseFont bf;
+            try (var is = getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf")) {
+                if (is == null) throw new RuntimeException("Font file not found");
+                byte[] fontBytes = is.readAllBytes();
+                bf = BaseFont.createFont("Roboto-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, true, fontBytes, null);
+            }
+
+            Font titleFont = new Font(bf, 18, Font.BOLD);
+            Font headerFont = new Font(bf, 14, Font.BOLD);
+            Font rowFont = new Font(bf, 12);
 
             org.openpdf.text.HeaderFooter header = new org.openpdf.text.HeaderFooter(new Phrase("Автоматизована інформаційна система ZLAGODA", headerFont), false);
             header.setAlignment(Element.ALIGN_CENTER);
@@ -60,7 +68,7 @@ public class ExportService {
             }
 
             doc.add(table);
-        } catch (DocumentException e) {
+        } catch (DocumentException | IOException e) {
             throw new ExportException("PDF", e);
         } finally {
             if (doc.isOpen()) doc.close();

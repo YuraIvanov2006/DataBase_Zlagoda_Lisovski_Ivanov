@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { checksApi } from '../../api/checks';
 import { salesApi } from '../../api/sales';
 import { employeesApi } from '../../api/employees';
+import { storeProductsApi } from '../../api/storeProducts';
 import { getApiErrorMessage } from '../../api/index';
 import { DataTable, type DataColumn, type TableSortState } from '../../components/DataTable';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -62,6 +63,7 @@ export function ManagerReceiptsPage() {
 
   const [totalSumCashier, setTotalSumCashier] = useState<number | null>(null);
   const [totalSumAllInPeriod, setTotalSumAllInPeriod] = useState<number | null>(null);
+  const [storeItems, setStoreItems] = useState<any[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -115,6 +117,12 @@ export function ManagerReceiptsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    storeProductsApi.getAll()
+      .then(res => setStoreItems(res.data as any[]))
+      .catch(e => console.error(e));
+  }, []);
 
   const fromD = dateFrom ? parseDayStart(dateFrom) : null;
   const toD = dateTo ? parseDayEnd(dateTo) : null;
@@ -313,15 +321,23 @@ export function ManagerReceiptsPage() {
         >
           UPC для підрахунку одиниць
           <input
+            list="upc-options-manager"
             value={upcProduct}
             onChange={(e) => setUpcProduct(e.target.value)}
-            placeholder="UPC"
+            placeholder="Введіть або оберіть UPC"
             style={{
               padding: '0.45rem',
               borderRadius: 8,
               border: '1px solid var(--border)',
             }}
           />
+          <datalist id="upc-options-manager">
+            {storeItems.map((s) => (
+              <option key={s.upc} value={s.upc}>
+                {s.product?.productName}
+              </option>
+            ))}
+          </datalist>
         </label>
         <button
           type="button"

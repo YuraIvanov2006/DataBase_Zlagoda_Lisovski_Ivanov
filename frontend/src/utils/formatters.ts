@@ -40,9 +40,14 @@ export function promotionalUnitPrice(
   sellingPrice: unknown,
   _promotional: boolean
 ): number {
-  // Backend already stores discounted price for promotional products.
-  // UI should display the persisted unit price as-is.
   const p = Number(sellingPrice);
   if (Number.isNaN(p)) return 0;
   return p;
+}
+
+export function formatPhoneInput(value: string): string {
+  if (!value) return '';
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '+';
+  return '+' + digits.slice(0, 12);
 }

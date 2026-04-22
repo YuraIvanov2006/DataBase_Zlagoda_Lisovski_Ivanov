@@ -194,24 +194,37 @@ export function CreateReceiptPage() {
       <div className="form-grid" style={{ maxWidth: 720 }}>
         <label className="stack" style={{ gridColumn: '1 / -1' }}>
           Картка клієнта (необовʼязково)
-          <select
+          <input
+            list="client-cards-list"
             value={cardNumber}
             onChange={(e) => setCardNumber(e.target.value)}
-          >
+            placeholder="— Без картки — (введіть або відскануйте)"
+          />
+          <datalist id="client-cards-list">
             <option value="">Без картки</option>
             {cards.map((c) => (
               <option key={c.cardNumber} value={c.cardNumber}>
-                {c.cardNumber} — {c.custSurname} {c.custName} ({c.percent}%)
+                {c.custSurname} {c.custName} ({c.percent}%)
               </option>
             ))}
-          </select>
+          </datalist>
         </label>
         <label>
           UPC
           <input
+            list="upc-options-create"
             value={upcInput}
             onChange={(e) => setUpcInput(e.target.value)}
+            placeholder="— Оберіть або введіть UPC —"
           />
+          <datalist id="upc-options-create">
+            {storeItems.map((s) => (
+              <option key={s.upc} value={s.upc}>
+                {s.product?.productName} {s.promotionalProduct ? '(Акційна ціна: ' : '(Ціна: '}
+                {money(promotionalUnitPrice(s.sellingPrice, s.promotionalProduct))})
+              </option>
+            ))}
+          </datalist>
         </label>
         <label>
           Кількість

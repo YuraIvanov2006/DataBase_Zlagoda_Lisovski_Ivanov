@@ -25,6 +25,7 @@ public class CheckService {
     private final CheckRepository repository;
     private final SaleService saleService;
     private final StoreProductService storeProductService;
+    private final CustomerCardService customerCardService;
 
     @Lazy
     @Autowired
@@ -119,6 +120,11 @@ public class CheckService {
             BigDecimal lineTotal = sp.getSellingPrice()
                     .multiply(BigDecimal.valueOf(sale.getProductNumber()));
             sumTotal = sumTotal.add(lineTotal);
+        }
+
+        // Отримуємо актуальні дані карти клієнта з БД
+        if (check.getCustomerCard() != null && check.getCustomerCard().getCardNumber() != null) {
+            check.setCustomerCard(customerCardService.findByCardNumber(check.getCustomerCard().getCardNumber()));
         }
 
         // Знижка по карті клієнта

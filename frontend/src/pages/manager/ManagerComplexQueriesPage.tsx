@@ -48,9 +48,9 @@ export function ManagerComplexQueriesPage() {
 
   return (
     <div>
-      <h1>Складні запити</h1>
-      <p style={{ color: 'var(--muted)', maxWidth: 800 }}>
-        Виконання та візуалізація складних аналітичних SQL-запитів до бази даних ZLAGODA.
+      <h1>Аналітика</h1>
+      <p style={{ color: 'var(--muted)', maxWidth: 600 }}>
+        Інформаційна панель для аналізу результатів діяльності магазину.
       </p>
 
       <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '2rem' }}>
@@ -64,7 +64,7 @@ export function ManagerComplexQueriesPage() {
           }}
           onClick={() => { setActiveTab('q1'); setError(''); }}
         >
-          Продажі за категоріями (Групування)
+          Продажі за категоріями
         </button>
         <button
           type="button"
@@ -76,7 +76,7 @@ export function ManagerComplexQueriesPage() {
           }}
           onClick={() => { setActiveTab('q2'); setError(''); }}
         >
-          Популярні товари (Подвійне заперечення)
+          Популярні товари
         </button>
       </div>
 
@@ -84,9 +84,9 @@ export function ManagerComplexQueriesPage() {
 
       {activeTab === 'q1' && (
         <div style={{ background: 'var(--bg-elevated)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-          <h3>Запит №1: Продажі товарів за категоріями</h3>
+          <h3>Продажі товарів за категоріями</h3>
           <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-            <strong>Умова:</strong> Отримати загальну кількість проданих одиниць та загальну суму продажів для кожної категорії товарів за вибраний період часу.
+            Аналіз загальної кількості проданих одиниць та загальної суми продажів для кожної категорії товарів за вибраний період часу.
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '2rem' }}>
@@ -136,9 +136,9 @@ export function ManagerComplexQueriesPage() {
 
       {activeTab === 'q2' && (
         <div style={{ background: 'var(--bg-elevated)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-          <h3>Запит №2: Товари, продані всіма касирами</h3>
+          <h3>Товари-лідери продажів</h3>
           <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-            <strong>Умова:</strong> Знайти товари, які були продані хоча б один раз КОЖНИМ касиром (використання подвійного заперечення).
+            Перелік товарів, які користуються найвищим попитом та були продані хоча б один раз кожним касиром магазину.
           </p>
 
           <div style={{ marginBottom: '2rem' }}>

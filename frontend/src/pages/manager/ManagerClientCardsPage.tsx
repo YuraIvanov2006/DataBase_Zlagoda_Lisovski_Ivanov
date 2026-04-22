@@ -7,6 +7,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Spinner } from '../../components/Spinner';
 import { validatePhone } from '../../utils/validators';
 import { sortRows, type SortValueType } from '../../utils/sort';
+import { formatPhoneInput } from '../../utils/formatters';
 
 type ClientCardRow = {
   cardNumber: string;
@@ -277,6 +278,7 @@ export function ManagerClientCardsPage() {
                 Номер картки
                 <input
                   value={form.cardNumber}
+                  maxLength={13}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, cardNumber: e.target.value }))
                   }
@@ -322,10 +324,11 @@ export function ManagerClientCardsPage() {
             <label>
               Телефон
               <input
+                type="tel"
                 value={form.custPhoneNumber}
                 maxLength={13}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, custPhoneNumber: e.target.value }))
+                  setForm((f) => ({ ...f, custPhoneNumber: formatPhoneInput(e.target.value) }))
                 }
               />
               {formErrors.custPhoneNumber && (
