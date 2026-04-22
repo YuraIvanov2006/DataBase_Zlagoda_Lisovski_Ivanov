@@ -9,4 +9,6 @@ import java.util.List;
 public interface ComplexQueryRepository {
     List<CategorySaleDto> getCategorySales(LocalDateTime startDate, LocalDateTime endDate);
     List<ProductSoldByAllDto> getProductsSoldByAllCashiers();
+    List<org.lisovskyi_ivanov.backend.dto.response.CustomerCategoryPurchasesDto> getCustomerPurchasesByCategory(Long categoryId, LocalDateTime startDate, LocalDateTime endDate);
+    List<org.lisovskyi_ivanov.backend.dto.response.CategoryBoughtByAllDto> getCategoriesBoughtByAllCustomers();
 }

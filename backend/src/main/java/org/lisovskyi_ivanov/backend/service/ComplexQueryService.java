@@ -22,4 +22,12 @@ public class ComplexQueryService {
     public List<ProductSoldByAllDto> getProductsSoldByAllCashiers() {
         return complexQueryRepository.getProductsSoldByAllCashiers();
     }
+
+    public List<org.lisovskyi_ivanov.backend.dto.response.CustomerCategoryPurchasesDto> getCustomerPurchasesByCategory(Long categoryId, LocalDateTime startDate, LocalDateTime endDate) {
+        return complexQueryRepository.getCustomerPurchasesByCategory(categoryId, startDate, endDate);
+    }
+
+    public List<org.lisovskyi_ivanov.backend.dto.response.CategoryBoughtByAllDto> getCategoriesBoughtByAllCustomers() {
+        return complexQueryRepository.getCategoriesBoughtByAllCustomers();
+    }
 }

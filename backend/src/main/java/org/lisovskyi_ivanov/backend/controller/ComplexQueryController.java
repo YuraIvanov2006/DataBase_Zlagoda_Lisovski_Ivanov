@@ -39,4 +39,24 @@ public class ComplexQueryController {
         List<ProductSoldByAllDto> result = complexQueryService.getProductsSoldByAllCashiers();
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/yura/customer-category-purchases")
+    public ResponseEntity<List<org.lisovskyi_ivanov.backend.dto.response.CustomerCategoryPurchasesDto>> getCustomerPurchasesByCategory(
+            @RequestParam Long categoryId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        
+        List<org.lisovskyi_ivanov.backend.dto.response.CustomerCategoryPurchasesDto> result = complexQueryService.getCustomerPurchasesByCategory(
+                categoryId,
+                startDate.atStartOfDay(),
+                endDate.atTime(LocalTime.MAX)
+        );
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/yura/categories-bought-by-all")
+    public ResponseEntity<List<org.lisovskyi_ivanov.backend.dto.response.CategoryBoughtByAllDto>> getCategoriesBoughtByAllCustomers() {
+        List<org.lisovskyi_ivanov.backend.dto.response.CategoryBoughtByAllDto> result = complexQueryService.getCategoriesBoughtByAllCustomers();
+        return ResponseEntity.ok(result);
+    }
 }

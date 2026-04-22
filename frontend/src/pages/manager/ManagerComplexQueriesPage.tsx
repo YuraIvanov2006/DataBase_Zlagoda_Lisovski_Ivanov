@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { queriesApi, CategorySale, ProductSoldByAll } from '../../api/queries';
+import { useState, useEffect } from 'react';
+import { queriesApi, CategorySale, ProductSoldByAll, CustomerCategoryPurchases, CategoryBoughtByAll } from '../../api/queries';
+import { categoriesApi } from '../../api/categories';
 import { getApiErrorMessage } from '../../api/index';
 import { Spinner } from '../../components/Spinner';
 
 export function ManagerComplexQueriesPage() {
-  const [activeTab, setActiveTab] = useState<'q1' | 'q2'>('q1');
+  const [activeTab, setActiveTab] = useState<'q1' | 'q2' | 'y1' | 'y2'>('q1');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -15,6 +16,20 @@ export function ManagerComplexQueriesPage() {
 
   // Tab 2 state
   const [products, setProducts] = useState<ProductSoldByAll[] | null>(null);
+
+  // Tab Yura 1 state
+  const [categories, setCategories] = useState<{ categoryNumber: number; categoryName: string }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
+  const [yuraStartDate, setYuraStartDate] = useState('');
+  const [yuraEndDate, setYuraEndDate] = useState('');
+  const [customerPurchases, setCustomerPurchases] = useState<CustomerCategoryPurchases[] | null>(null);
+
+  // Tab Yura 2 state
+  const [categoriesBoughtByAll, setCategoriesBoughtByAll] = useState<CategoryBoughtByAll[] | null>(null);
+
+  useEffect(() => {
+    categoriesApi.getAll().then(res => setCategories(res.data)).catch(console.error);
+  }, []);
 
   const fetchCategorySales = async () => {
     if (!startDate || !endDate) {
@@ -46,6 +61,36 @@ export function ManagerComplexQueriesPage() {
     }
   };
 
+  const fetchCustomerCategoryPurchases = async () => {
+    if (!yuraStartDate || !yuraEndDate || selectedCategory === '') {
+      setError('Будь ласка, оберіть дати та категорію');
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      const data = await queriesApi.getCustomerPurchasesByCategory(Number(selectedCategory), yuraStartDate, yuraEndDate);
+      setCustomerPurchases(data);
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const fetchCategoriesBoughtByAll = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const data = await queriesApi.getCategoriesBoughtByAllCustomers();
+      setCategoriesBoughtByAll(data);
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div>
       <h1>Аналітика</h1>
@@ -64,7 +109,7 @@ export function ManagerComplexQueriesPage() {
           }}
           onClick={() => { setActiveTab('q1'); setError(''); }}
         >
-          Продажі за категоріями
+          Продажі за категоріями (А)
         </button>
         <button
           type="button"
@@ -76,7 +121,31 @@ export function ManagerComplexQueriesPage() {
           }}
           onClick={() => { setActiveTab('q2'); setError(''); }}
         >
-          Популярні товари
+          Популярні товари (А)
+        </button>
+        <button
+          type="button"
+          style={{
+            background: 'none', border: 'none', padding: '0.75rem 1rem', cursor: 'pointer',
+            borderBottom: activeTab === 'y1' ? '2px solid var(--primary)' : '2px solid transparent',
+            color: activeTab === 'y1' ? 'var(--primary)' : 'var(--text)',
+            fontWeight: activeTab === 'y1' ? 600 : 400
+          }}
+          onClick={() => { setActiveTab('y1'); setError(''); }}
+        >
+          Покупки клієнтів (Ю)
+        </button>
+        <button
+          type="button"
+          style={{
+            background: 'none', border: 'none', padding: '0.75rem 1rem', cursor: 'pointer',
+            borderBottom: activeTab === 'y2' ? '2px solid var(--primary)' : '2px solid transparent',
+            color: activeTab === 'y2' ? 'var(--primary)' : 'var(--text)',
+            fontWeight: activeTab === 'y2' ? 600 : 400
+          }}
+          onClick={() => { setActiveTab('y2'); setError(''); }}
+        >
+          Категорії-лідери (Ю)
         </button>
       </div>
 
@@ -166,6 +235,113 @@ export function ManagerComplexQueriesPage() {
                       <tr key={idx}>
                         <td>{item.idProduct}</td>
                         <td>{item.productName}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'y1' && (
+        <div style={{ background: 'var(--bg-elevated)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <h3>Аналіз покупок клієнтів за категорією</h3>
+          <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
+            Знайти загальну кількість куплених одиниць та загальну суму витрат для кожного клієнта (власника картки), які купували товари певної категорії за вибраний період часу.
+          </p>
+
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Категорія</label>
+              <select value={selectedCategory} onChange={e => setSelectedCategory(Number(e.target.value))}>
+                <option value="">Оберіть категорію</option>
+                {categories.map(c => (
+                  <option key={c.categoryNumber} value={c.categoryNumber}>{c.categoryName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Дата початку</label>
+              <input type="date" value={yuraStartDate} max={yuraEndDate || undefined} onChange={e => setYuraStartDate(e.target.value)} />
+            </div>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Дата завершення</label>
+              <input type="date" value={yuraEndDate} min={yuraStartDate || undefined} onChange={e => setYuraEndDate(e.target.value)} />
+            </div>
+            <button className="btn primary" onClick={fetchCustomerCategoryPurchases} disabled={busy}>
+              {busy ? <Spinner /> : 'Виконати запит'}
+            </button>
+          </div>
+
+          {customerPurchases && (
+            <div className="table-responsive">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>№ картки</th>
+                    <th>Прізвище</th>
+                    <th>Ім'я</th>
+                    <th style={{ textAlign: 'right' }}>Куплено одиниць</th>
+                    <th style={{ textAlign: 'right' }}>Загальна сума (₴)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customerPurchases.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center' }}>За вказаний період немає даних</td>
+                    </tr>
+                  ) : (
+                    customerPurchases.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>{item.cardNumber}</td>
+                        <td>{item.custSurname}</td>
+                        <td>{item.custName}</td>
+                        <td style={{ textAlign: 'right' }}>{item.totalItems}</td>
+                        <td style={{ textAlign: 'right' }}>{item.totalSpent.toFixed(2)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'y2' && (
+        <div style={{ background: 'var(--bg-elevated)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <h3>Категорії-лідери (куплені всіма клієнтами)</h3>
+          <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
+            Знайти категорії, з яких КОЖЕН клієнт (власник картки) купив хоча б один товар (подвійне заперечення).
+          </p>
+
+          <div style={{ marginBottom: '2rem' }}>
+            <button className="btn primary" onClick={fetchCategoriesBoughtByAll} disabled={busy}>
+              {busy ? <Spinner /> : 'Знайти категорії'}
+            </button>
+          </div>
+
+          {categoriesBoughtByAll && (
+            <div className="table-responsive">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>ID Категорії</th>
+                    <th>Назва категорії</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoriesBoughtByAll.length === 0 ? (
+                    <tr>
+                      <td colSpan={2} style={{ textAlign: 'center' }}>Немає категорій, які б купили всі клієнти</td>
+                    </tr>
+                  ) : (
+                    categoriesBoughtByAll.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>{item.categoryNumber}</td>
+                        <td>{item.categoryName}</td>
                       </tr>
                     ))
                   )}

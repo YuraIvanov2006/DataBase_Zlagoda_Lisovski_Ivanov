@@ -19,19 +19,19 @@ public class ComplexQueryRepositoryImpl implements ComplexQueryRepository {
     @Override
     public List<CategorySaleDto> getCategorySales(LocalDateTime startDate, LocalDateTime endDate) {
         String sql = """
-            SELECT 
-                c.category_name, 
-                SUM(s.product_number) AS total_amount, 
-                SUM(s.product_number * s.selling_price) AS total_sum
-            FROM categories c
-            JOIN products p ON c.category_number = p.category_number
-            JOIN store_products sp ON p.id_product = sp.id_product
-            JOIN sales s ON sp.upc = s.upc
-            JOIN checks ch ON s.check_number = ch.check_number
-            WHERE ch.print_date BETWEEN :startDate AND :endDate
-            GROUP BY c.category_number, c.category_name
-            ORDER BY total_sum DESC
-        """;
+                    SELECT
+                        c.category_name,
+                        SUM(s.product_number) AS total_amount,
+                        SUM(s.product_number * s.selling_price) AS total_sum
+                    FROM categories c
+                    JOIN products p ON c.category_number = p.category_number
+                    JOIN store_products sp ON p.id_product = sp.id_product
+                    JOIN sales s ON sp.upc = s.upc
+                    JOIN checks ch ON s.check_number = ch.check_number
+                    WHERE ch.print_date BETWEEN :startDate AND :endDate
+                    GROUP BY c.category_number, c.category_name
+                    ORDER BY total_sum DESC
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("startDate", startDate)
@@ -40,33 +40,89 @@ public class ComplexQueryRepositoryImpl implements ComplexQueryRepository {
         return namedJdbc.query(sql, params, (rs, rowNum) -> new CategorySaleDto(
                 rs.getString("category_name"),
                 rs.getInt("total_amount"),
-                rs.getBigDecimal("total_sum")
-        ));
+                rs.getBigDecimal("total_sum")));
     }
 
     @Override
     public List<ProductSoldByAllDto> getProductsSoldByAllCashiers() {
         String sql = """
-            SELECT p.id_product, p.product_name
-            FROM products p
-            WHERE NOT EXISTS (
-                SELECT e.id_employee
-                FROM employees e
-                WHERE e.empl_role = 'cashier'
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM sales s
-                    JOIN checks ch ON s.check_number = ch.check_number
-                    JOIN store_products sp ON s.upc = sp.upc
-                    WHERE ch.id_employee = e.id_employee
-                      AND sp.id_product = p.id_product
-                )
-            )
-        """;
+                    SELECT p.id_product, p.product_name
+                    FROM products p
+                    WHERE NOT EXISTS (
+                        SELECT e.id_employee
+                        FROM employees e
+                        WHERE e.empl_role = 'cashier'
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM sales s
+                            JOIN checks ch ON s.check_number = ch.check_number
+                            JOIN store_products sp ON s.upc = sp.upc
+                            WHERE ch.id_employee = e.id_employee
+                              AND sp.id_product = p.id_product
+                        )
+                    )
+                """;
 
         return namedJdbc.query(sql, new MapSqlParameterSource(), (rs, rowNum) -> new ProductSoldByAllDto(
                 rs.getLong("id_product"),
-                rs.getString("product_name")
-        ));
+                rs.getString("product_name")));
+    }
+
+    @Override
+    public List<org.lisovskyi_ivanov.backend.dto.response.CustomerCategoryPurchasesDto> getCustomerPurchasesByCategory(
+            Long categoryId, LocalDateTime startDate, LocalDateTime endDate) {
+        String sql = """
+                    SELECT cc.card_number, cc.cust_surname, cc.cust_name,
+                           SUM(s.product_number) AS total_items,
+                           SUM(s.product_number * s.selling_price) AS total_spent
+                    FROM customer_card cc
+                    JOIN checks ch ON cc.card_number = ch.card_number
+                    JOIN sales s ON ch.check_number = s.check_number
+                    JOIN store_products sp ON s.upc = sp.upc
+                    JOIN products p ON sp.id_product = p.id_product
+                    WHERE p.category_number = :categoryId
+                      AND ch.print_date BETWEEN :startDate AND :endDate
+                    GROUP BY cc.card_number, cc.cust_surname, cc.cust_name
+                    ORDER BY total_spent DESC
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("categoryId", categoryId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+
+        return namedJdbc.query(sql, params,
+                (rs, rowNum) -> new org.lisovskyi_ivanov.backend.dto.response.CustomerCategoryPurchasesDto(
+                        rs.getString("card_number"),
+                        rs.getString("cust_surname"),
+                        rs.getString("cust_name"),
+                        rs.getInt("total_items"),
+                        rs.getBigDecimal("total_spent")));
+    }
+
+    @Override
+    public List<org.lisovskyi_ivanov.backend.dto.response.CategoryBoughtByAllDto> getCategoriesBoughtByAllCustomers() {
+        String sql = """
+                    SELECT c.category_number, c.category_name
+                    FROM categories c
+                    WHERE NOT EXISTS (
+                        SELECT cc.card_number
+                        FROM customer_card cc
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM checks ch
+                            JOIN sales s ON ch.check_number = s.check_number
+                            JOIN store_products sp ON s.upc = sp.upc
+                            JOIN products p ON sp.id_product = p.id_product
+                            WHERE ch.card_number = cc.card_number
+                              AND p.category_number = c.category_number
+                        )
+                    )
+                """;
+
+        return namedJdbc.query(sql, new MapSqlParameterSource(),
+                (rs, rowNum) -> new org.lisovskyi_ivanov.backend.dto.response.CategoryBoughtByAllDto(
+                        rs.getLong("category_number"),
+                        rs.getString("category_name")));
     }
 }

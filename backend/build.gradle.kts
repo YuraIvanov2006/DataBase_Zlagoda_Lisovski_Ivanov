@@ -53,6 +53,7 @@ dependencies {
     implementation("com.github.librepdf:openpdf:${pdfVersion}")
     // Excel
     implementation("org.apache.poi:poi-ooxml:${excelVersion}")
+    implementation("org.projectlombok:lombok:1.18.38")
 
     compileOnly("org.projectlombok:lombok")
 
